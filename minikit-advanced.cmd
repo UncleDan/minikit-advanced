@@ -1,13 +1,17 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set installVeeam=false
+set installVeeam=true
+set installFirefox=true
+set installThunderbird=true
 set runWinUtil=false
 
 REM Analizza tutti i parametri
 for %%p in (%*) do (
     if /I "%%p"=="/b" set installVeeam=true
-    if /I "%%p"=="/t" set runWinUtil=true
+    if /I "%%p"=="/f" set installFirefox=true
+    if /I "%%p"=="/t" set installThunderbird=true
+    if /I "%%p"=="/w" set runWinUtil=true
 )
 
 REM Verifica se winget è disponibile
@@ -25,6 +29,12 @@ IF %ERRORLEVEL% EQU 0 (
     if "!installVeeam!"=="true" (
         echo Installazione di Veeam Agent in corso...
         winget install --id Veeam.VeeamAgent -e --accept-package-agreements --accept-source-agreements
+    if "!installFirefox!"=="true" (
+        echo Installazione di Mozilla Firefox in corso...
+        winget install --id Mozilla.Firefox.it -e --accept-package-agreements --accept-source-agreements
+    if "!installThunderbird!"=="true" (
+        echo Installazione di Mozilla Thunderbird in corso...
+        winget install --id Mozilla.Thunderbird.it -e --accept-package-agreements --accept-source-agreements
     )
 ) ELSE (
     echo Winget non è installato. Provo ad installarlo...
@@ -46,20 +56,20 @@ IF %ERRORLEVEL% EQU 0 (
     )
 )
 
-REM Creazione collegamento nel Menu Start utente (sovrascrive se già esiste)
-set shortcutName=WinUtil - Chris Titus Tech
-set startMenuPath=%APPDATA%\Microsoft\Windows\Start Menu\Programs
-set shortcutFullPath=%startMenuPath%\%shortcutName%.lnk
-
-powershell -NoProfile -Command ^
-"$s=(New-Object -COM WScript.Shell).CreateShortcut('%shortcutFullPath%'); ^
-$s.TargetPath='powershell.exe'; ^
-$s.Arguments='-NoExit -Command "& { irm https://christitus.com/win | iex }"'; ^
-$s.WorkingDirectory='%USERPROFILE%'; ^
-$s.WindowStyle=7; ^
-$s.IconLocation='powershell.exe'; ^
-$s.Save()"
-echo Collegamento a WinUtil aggiornato nel Menu Start ✔️
+@rem REM Creazione collegamento nel Menu Start utente (sovrascrive se già esiste)
+@rem set shortcutName=WinUtil - Chris Titus Tech
+@rem set startMenuPath=%APPDATA%\Microsoft\Windows\Start Menu\Programs
+@rem set shortcutFullPath=%startMenuPath%\%shortcutName%.lnk
+@rem 
+@rem powershell -NoProfile -Command ^
+@rem "$s=(New-Object -COM WScript.Shell).CreateShortcut('%shortcutFullPath%'); ^
+@rem $s.TargetPath='powershell.exe'; ^
+@rem $s.Arguments='-NoExit -Command "& { irm https://christitus.com/win | iex }"'; ^
+@rem $s.WorkingDirectory='%USERPROFILE%'; ^
+@rem $s.WindowStyle=7; ^
+@rem $s.IconLocation='powershell.exe'; ^
+@rem $s.Save()"
+@rem echo Collegamento a WinUtil aggiornato nel Menu Start ✔️
 
 REM Esecuzione dello script WinUtil se richiesto
 if "!runWinUtil!"=="true" (
