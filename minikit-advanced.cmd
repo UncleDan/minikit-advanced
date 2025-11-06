@@ -371,12 +371,5 @@ echo.
 echo 📄 Log completo: %logfile%
 echo.
 
-REM Mostra il percorso completo del log
-echo.
-echo Percorso log: %logfile%
-echo.
-
-pause
-
 :EOF
 endlocal
