@@ -249,7 +249,7 @@ if %errorlevel% equ 0 (
     if "!report_minute!" lss "10" set "report_minute=0!report_minute!"
     
     set "reportfile=Speccy_Report_%COMPUTERNAME%_!report_year!-!report_month!-!report_day!_!report_hour!-!report_minute!.txt"
-    speccy.exe /silent "%USERPROFILE%\Desktop\%reportfile%"
+    "C:\Program Files\Speccy\Speccy.exe" /silent "%USERPROFILE%\Desktop\%reportfile%"
     if exist "%USERPROFILE%\Desktop\%reportfile%" (
         echo [%time%] ✓ Report Speccy creato >> "%logfile%"
     ) else (
