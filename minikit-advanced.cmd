@@ -338,14 +338,15 @@ if !RUN_WINUTIL!==1 (
 )
 
 :CREATE_WINUTIL
-echo [%time%] Creazione collegamento WinUtil... >> "%logfile%"
-echo Creazione collegamento WinUtil...
-powershell -WindowStyle Hidden -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\WinUtil.lnk'); $Shortcut.TargetPath = 'powershell.exe'; $Shortcut.Arguments = '-NoExit -Command \"irm https://christitus.com/win | iex\"'; $Shortcut.WorkingDirectory = '%USERPROFILE%'; $Shortcut.Save()"
-if %errorlevel% equ 0 (
-    echo [%time%] ✓ Collegamento WinUtil creato >> "%logfile%"
-) else (
-    echo [%time%] ✗ Errore creazione collegamento WinUtil >> "%logfile%"
-)
+@rem TEMPORARILY DISABLED AS IT DOESN'T WORK
+@rem echo [%time%] Creazione collegamento WinUtil... >> "%logfile%"
+@rem echo Creazione collegamento WinUtil...
+@rem powershell -WindowStyle Hidden -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\WinUtil.lnk'); $Shortcut.TargetPath = 'powershell.exe'; $Shortcut.Arguments = '-NoExit -Command \"irm https://christitus.com/win | iex\"'; $Shortcut.WorkingDirectory = '%USERPROFILE%'; $Shortcut.Save()"
+@rem if %errorlevel% equ 0 (
+@rem     echo [%time%] ✓ Collegamento WinUtil creato >> "%logfile%"
+@rem ) else (
+@rem     echo [%time%] ✗ Errore creazione collegamento WinUtil >> "%logfile%"
+@rem )
 
 :COMPLETED
 echo. >> "%logfile%"
@@ -362,7 +363,7 @@ if "%~1"=="" (
     echo ✓ Software base installati
     echo ✓ Report Speccy generato sul Desktop
     echo ✓ Supremo scaricato sul Desktop
-    echo ✓ Collegamento WinUtil creato nel Menu Start
+@rem     echo ✓ Collegamento WinUtil creato nel Menu Start
 ) else (
     echo ✓ Software opzionali installati
 )
