@@ -155,7 +155,6 @@ echo   %SCRIPT_FULLNAME% -p -b -f           - Solo PowerShell + Veeam + Firefox
 echo   %SCRIPT_FULLNAME% -n -t -v           - Solo Notepad++ + TeamViewer + VS Code
 echo   %SCRIPT_FULLNAME% -f -r -w           - Solo Firefox + Thunderbird + WinUtil
 echo.
-pause
 goto EOF
 
 :CHECK_WINGET
