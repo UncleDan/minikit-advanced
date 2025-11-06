@@ -22,7 +22,7 @@ class BatchStyleInstaller:
         self.log_file = f"minikit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
         self.winget_available = False
         
-        # Software di base (sempre installati)
+        # Software di base (installati solo SENZA parametri)
         self.base_software = {
             "7-Zip": "7zip.7zip",
             "Adobe Reader (IT)": "Adobe.Acrobat.Reader.64-bit",
@@ -33,11 +33,14 @@ class BatchStyleInstaller:
             "Supremo Remote Desktop": "supremo"
         }
         
-        # Software opzionale
+        # Software opzionale (installati solo CON parametri)
         self.optional_software = {
             "Veeam Agent": "Veeam.VeeamAgent",
             "Mozilla Firefox (IT)": "Mozilla.Firefox.it",
-            "Mozilla Thunderbird (IT)": "Mozilla.Thunderbird.it"
+            "Mozilla Thunderbird (IT)": "Mozilla.Thunderbird.it",
+            "Notepad++ (IT)": "Notepad++.Notepad++",
+            "TeamViewer (IT)": "TeamViewer.TeamViewer",
+            "Visual Studio Code": "Microsoft.VisualStudioCode"
         }
         
         self.print_banner()
@@ -74,7 +77,7 @@ class BatchStyleInstaller:
                 stderr=subprocess.STDOUT,
                 text=True,
                 universal_newlines=True,
-                creationflags=subprocess.CREATE_NO_WINDOW  # IMPORTANTE: nessuna nuova finestra!
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
             
             # Legge l'output in tempo reale
@@ -102,21 +105,42 @@ class BatchStyleInstaller:
         
         if '-h' in args or '--help' in args or '/?' in args:
             self.show_help()
-            return None, None, None, None
+            return None
         
-        backup = '-b' in args or '--backup' in args
-        firefox = '-f' in args or '--firefox' in args
-        thunderbird = '-r' in args or '--thunderbird' in args
+        # Se nessun parametro, installa solo software base
+        if not args:
+            self.log("NESSUN PARAMETRO: Installazione SOLO software base")
+            return "base"
+        
+        # Altrimenti installa solo i software opzionali specificati
+        self.log("PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati")
+        
+        selected_software = {}
+        
+        if '-b' in args or '--backup' in args:
+            selected_software["Veeam Agent"] = self.optional_software["Veeam Agent"]
+        if '-f' in args or '--firefox' in args:
+            selected_software["Mozilla Firefox (IT)"] = self.optional_software["Mozilla Firefox (IT)"]
+        if '-r' in args or '--thunderbird' in args:
+            selected_software["Mozilla Thunderbird (IT)"] = self.optional_software["Mozilla Thunderbird (IT)"]
+        if '-n' in args or '--notepad' in args:
+            selected_software["Notepad++ (IT)"] = self.optional_software["Notepad++ (IT)"]
+        if '-t' in args or '--teamviewer' in args:
+            selected_software["TeamViewer (IT)"] = self.optional_software["TeamViewer (IT)"]
+        if '-v' in args or '--vscode' in args:
+            selected_software["Visual Studio Code"] = self.optional_software["Visual Studio Code"]
+        
         winutil = '-w' in args or '--winutil' in args
         
         self.log("CONFIGURAZIONE INSTALLAZIONE:")
-        self.log(f"  Backup Agent (Veeam): {'SI' if backup else 'NO'}")
-        self.log(f"  Firefox: {'SI' if firefox else 'NO'}")
-        self.log(f"  Thunderbird: {'SI' if thunderbird else 'NO'}")
+        self.log(f"  Software base: NO")
+        self.log(f"  Software opzionali selezionati: {len(selected_software)}")
+        for name in selected_software.keys():
+            self.log(f"    • {name}")
         self.log(f"  WinUtil: {'SI' if winutil else 'NO'}")
         self.log("-" * 50)
         
-        return backup, firefox, thunderbird, winutil
+        return {"software": selected_software, "winutil": winutil}
     
     def show_help(self):
         """Mostra l'help"""
@@ -129,24 +153,35 @@ USO:
 OPZIONI:
     -b, --backup        Installa Veeam Agent per backup
     -f, --firefox       Installa Mozilla Firefox (italiano)
-    -r, --thunderbird   Installa Mozilla Thunderbird (italiano)  
+    -r, --thunderbird   Installa Mozilla Thunderbird (italiano)
+    -n, --notepad       Installa Notepad++ (italiano)
+    -t, --teamviewer    Installa TeamViewer (italiano)
+    -v, --vscode        Installa Visual Studio Code
     -w, --winutil       Esegue Chris Titus Tech WinUtil
     -h, --help          Mostra questo aiuto
 
-SOFTWARE BASE (sempre installato):
+LOGICA INSTALLAZIONE:
+    • SENZA parametri: Installa SOLO software base
+    • CON parametri:   Installa SOLO software opzionali specificati (NO base)
+
+SOFTWARE BASE (solo senza parametri):
     7-Zip, Adobe Reader IT, Google Chrome IT, PowerShell
     Speccy, LibreOffice IT, Supremo Remote Desktop
 
+SOFTWARE OPZIONALI (solo con parametri):
+    Veeam Agent, Firefox IT, Thunderbird IT, Notepad++ IT
+    TeamViewer IT, Visual Studio Code
+
 ESEMPI:
     minikit_advanced.exe                    # Solo software base
-    minikit_advanced.exe -b -f              # Base + Veeam + Firefox
-    minikit_advanced.exe -f -r -w           # Base + Firefox + Thunderbird + WinUtil
+    minikit_advanced.exe -b -f              # Solo Veeam + Firefox (NO base)
+    minikit_advanced.exe -n -t -v           # Solo Notepad++ + TeamViewer + VS Code
+    minikit_advanced.exe -f -r -w           # Solo Firefox + Thunderbird + WinUtil
 
 NOTA: Per evitare aperture di finestre, eseguire da Prompt dei Comandi.
 """
         print(help_text)
-        input("Premere INVIO per uscire...")
-        sys.exit(0)
+        return
     
     def check_winget(self):
         """Verifica se winget è disponibile"""
@@ -157,7 +192,7 @@ NOTA: Per evitare aperture di finestre, eseguire da Prompt dei Comandi.
                 capture_output=True, 
                 text=True, 
                 check=True,
-                creationflags=subprocess.CREATE_NO_WINDOW  # Nessuna finestra!
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
             self.winget_available = True
             self.log(f"✓ Winget trovato - Versione: {result.stdout.strip()}")
@@ -208,10 +243,48 @@ NOTA: Per evitare aperture di finestre, eseguire da Prompt dei Comandi.
             self.log(f"✗ Errore download Supremo: {e}")
             return False
     
+    def run_speccy_report(self):
+        """Esegue Speccy in modalità silent per generare report"""
+        self.log("Generazione report Speccy...")
+        try:
+            # Ottiene il nome del computer
+            computer_name = os.environ.get('COMPUTERNAME', 'UnknownPC')
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            
+            # Crea il nome del file report
+            report_filename = f"Speccy_Report_{computer_name}_{timestamp}.txt"
+            desktop_path = Path.home() / "Desktop"
+            report_path = desktop_path / report_filename
+            
+            self.log(f"Creazione report: {report_path}")
+            
+            # Esegue Speccy in modalità silent per generare il report
+            success = self.run_command([
+                "speccy.exe", "/silent", report_path
+            ], f"Generazione report Speccy: {report_filename}")
+            
+            if success:
+                # Verifica che il file sia stato creato
+                if report_path.exists():
+                    file_size = report_path.stat().st_size
+                    self.log(f"✓ Report Speccy creato ({file_size} bytes)")
+                    return True
+                else:
+                    self.log("✗ Report Speccy non creato")
+                    return False
+            else:
+                self.log("✗ Errore nell'esecuzione di Speccy")
+                return False
+                
+        except Exception as e:
+            self.log(f"✗ Errore generazione report Speccy: {e}")
+            return False
+    
     def install_base_software(self):
         """Installa il software di base"""
         self.log("INSTALLAZIONE SOFTWARE BASE...")
         success_count = 0
+        speccy_installed = False
         
         for name, package_id in self.base_software.items():
             if name == "Supremo Remote Desktop":
@@ -224,29 +297,29 @@ NOTA: Per evitare aperture di finestre, eseguire da Prompt dei Comandi.
                     "--accept-package-agreements", "--accept-source-agreements"
                 ], f"Installazione {name}"):
                     success_count += 1
+                    # Segna se Speccy è stato installato con successo
+                    if name == "Speccy":
+                        speccy_installed = True
+        
+        # Se Speccy è stato installato con successo, genera il report
+        if speccy_installed:
+            self.log("Speccy installato con successo - generazione report...")
+            time.sleep(2)  # Attende che l'installazione sia completata
+            self.run_speccy_report()
         
         self.log(f"Software base installati: {success_count}/{len(self.base_software)}")
         return success_count > 0
     
-    def install_optional_software(self, backup, firefox, thunderbird):
-        """Installa il software opzionale"""
-        optional_to_install = {}
-        
-        if backup:
-            optional_to_install["Veeam Agent"] = self.optional_software["Veeam Agent"]
-        if firefox:
-            optional_to_install["Mozilla Firefox (IT)"] = self.optional_software["Mozilla Firefox (IT)"]
-        if thunderbird:
-            optional_to_install["Mozilla Thunderbird (IT)"] = self.optional_software["Mozilla Thunderbird (IT)"]
-        
-        if not optional_to_install:
+    def install_optional_software(self, selected_software):
+        """Installa il software opzionale specificato"""
+        if not selected_software:
             self.log("Nessun software opzionale selezionato")
             return True
         
-        self.log("INSTALLAZIONE SOFTWARE OPZIONALE...")
+        self.log("INSTALLAZIONE SOFTWARE OPZIONALI...")
         success_count = 0
         
-        for name, package_id in optional_to_install.items():
+        for name, package_id in selected_software.items():
             self.log(f"Installando {name}...")
             if self.run_command([
                 "winget", "install", "-h", "--id", package_id, "-e",
@@ -254,8 +327,15 @@ NOTA: Per evitare aperture di finestre, eseguire da Prompt dei Comandi.
             ], f"Installazione {name}"):
                 success_count += 1
         
-        self.log(f"Software opzionale installati: {success_count}/{len(optional_to_install)}")
+        self.log(f"Software opzionali installati: {success_count}/{len(selected_software)}")
         return success_count > 0
+    
+    def update_winget_packages(self):
+        """Aggiorna i pacchetti winget"""
+        self.log("Aggiornamento pacchetti...")
+        return self.run_command([
+            "winget", "update", "--all", "--include-unknown"
+        ], "Aggiornamento pacchetti winget")
     
     def create_winutil_shortcut(self):
         """Crea collegamento a WinUtil nel Menu Start"""
@@ -264,7 +344,6 @@ NOTA: Per evitare aperture di finestre, eseguire da Prompt dei Comandi.
             start_menu_path = Path.home() / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs"
             start_menu_path.mkdir(parents=True, exist_ok=True)
             
-            # Crea script PowerShell per il collegamento
             ps_script = f'''
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("{start_menu_path / 'WinUtil.lnk'}")
@@ -275,7 +354,6 @@ $Shortcut.Save()
 "Collegamento creato"
 '''
             
-            # Esegue PowerShell SENZA finestra
             result = self.run_command([
                 "powershell", "-WindowStyle", "Hidden", "-Command", ps_script
             ], "Creazione collegamento WinUtil")
@@ -298,10 +376,8 @@ $Shortcut.Save()
         """Procedura principale di installazione"""
         # Analizza parametri
         params = self.parse_arguments()
-        if params[0] is None:  # Help richiesto
-            return
-        
-        backup, firefox, thunderbird, winutil = params
+        if params is None:  # Help richiesto
+            return False
         
         # Verifica Winget
         if not self.check_winget():
@@ -310,24 +386,34 @@ $Shortcut.Save()
                 return False
         
         # Aggiornamento pacchetti
-        self.log("Aggiornamento pacchetti...")
-        self.run_command(["winget", "update", "--all", "--include-unknown"], "Aggiornamento pacchetti")
+        self.update_winget_packages()
         
-        # Installazione software
-        self.install_base_software()
-        self.install_optional_software(backup, firefox, thunderbird)
+        # Installazione in base ai parametri
+        if params == "base":
+            # Solo software base
+            self.install_base_software()
+        else:
+            # Solo software opzionali specificati
+            self.install_optional_software(params["software"])
+            
+            # WinUtil se richiesto
+            if params["winutil"]:
+                self.run_winutil()
         
-        # Collegamento WinUtil
+        # Collegamento WinUtil (sempre creato)
         self.create_winutil_shortcut()
-        
-        # Esecuzione WinUtil se richiesto
-        if winutil:
-            self.run_winutil()
         
         self.log("=" * 70)
         self.log("INSTALLAZIONE COMPLETATA")
         self.log("=" * 70)
         return True
+
+def safe_input(prompt=""):
+    """Input sicuro che evita l'errore 'lost sys.stdin'"""
+    try:
+        return input(prompt)
+    except (EOFError, RuntimeError):
+        return ""
 
 def main():
     """Funzione principale"""
@@ -337,7 +423,7 @@ def main():
         print("Per evitare aperture di finestre, usa il Prompt dei Comandi:")
         print("  minikit_advanced.exe -h  (per help)")
         print()
-        input("Premere INVIO per uscire...")
+        safe_input("Premere INVIO per uscire...")
         return 1
     
     installer = BatchStyleInstaller()
@@ -347,8 +433,7 @@ def main():
         
         if success:
             print(f"\n✓ {SCRIPT_NAME} v{SCRIPT_VERSION} - INSTALLAZIONE COMPLETATA")
-            print("✓ Tutti i software sono stati installati")
-            print("✓ Supremo.exe scaricato sul Desktop")
+            print("✓ Report Speccy generato sul Desktop")
         else:
             print(f"\n⚠ {SCRIPT_NAME} v{SCRIPT_VERSION} - INSTALLAZIONE CON ERRORI")
         
@@ -364,7 +449,7 @@ def main():
         return 1
     
     print("\nPremere INVIO per uscire...")
-    input()
+    safe_input()
     return 0
 
 if __name__ == "__main__":
