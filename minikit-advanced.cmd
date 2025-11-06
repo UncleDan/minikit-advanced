@@ -361,11 +361,11 @@ echo.
 if "%~1"=="" (
     echo ✓ Software base installati
     echo ✓ Report Speccy generato sul Desktop
+    echo ✓ Supremo scaricato sul Desktop
+    echo ✓ Collegamento WinUtil creato nel Menu Start
 ) else (
     echo ✓ Software opzionali installati
 )
-echo ✓ Supremo scaricato sul Desktop
-echo ✓ Collegamento WinUtil creato nel Menu Start
 echo.
 echo 📄 Log completo: %logfile%
 echo.
