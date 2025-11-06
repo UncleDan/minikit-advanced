@@ -8,14 +8,15 @@ set "SCRIPT_NAME=Mini-Kit Advanced"
 set "SCRIPT_AUTHOR=Daniele Lolli (UncleDan)"
 set "SCRIPT_VERSION=25.11"
 
-REM Ottiene il nome completo del file in esecuzione
+REM Ottiene il nome completo del file in esecuzione e il percorso
 set "SCRIPT_FULLNAME=%~nx0"
 set "SCRIPT_NAME_NOEXT=%~n0"
+set "SCRIPT_PATH=%~dp0"
 
 REM Configurazione percorso e nome file log
 for /f "tokens=1-3 delims=/" %%a in ('date /t') do (set mydate=%%c%%a%%b)
 for /f "tokens=1-2 delims=:" %%a in ('time /t') do (set mytime=%%a%%b)
-set "logfile=%SCRIPT_NAME_NOEXT%_%mydate%_%mytime%.log"
+set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_%mydate%_%mytime%.log"
 
 echo ====================================================================== >> "%logfile%"
 echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
@@ -325,6 +326,12 @@ echo ✓ Collegamento WinUtil creato nel Menu Start
 echo.
 echo 📄 Log completo: %logfile%
 echo.
+
+REM Mostra il percorso completo del log
+echo.
+echo Percorso log: %logfile%
+echo.
+
 pause
 
 :EOF
