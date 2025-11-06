@@ -13,10 +13,31 @@ set "SCRIPT_FULLNAME=%~nx0"
 set "SCRIPT_NAME_NOEXT=%~n0"
 set "SCRIPT_PATH=%~dp0"
 
-REM Configurazione percorso e nome file log
-for /f "tokens=1-3 delims=/" %%a in ('date /t') do (set mydate=%%c%%a%%b)
-for /f "tokens=1-2 delims=:" %%a in ('time /t') do (set mytime=%%a%%b)
-set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_%mydate%_%mytime%.log"
+REM Configurazione percorso e nome file log con formato migliorato
+for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
+    set "year=%%c"
+    set "month=%%a"
+    set "day=%%b"
+)
+for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
+    set "hour=%%a"
+    set "minute=%%b"
+)
+
+REM Rimuove tutti gli spazi
+set "year=!year: =!"
+set "month=!month: =!"
+set "day=!day: =!"
+set "hour=!hour: =!"
+set "minute=!minute: =!"
+
+REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
+if "!month!" lss "10" set "month=0!month!"
+if "!day!" lss "10" set "day=0!day!"
+if "!hour!" lss "10" set "hour=0!hour!"
+if "!minute!" lss "10" set "minute=0!minute!"
+
+set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_!year!-!month!-!day!_!hour!-!minute!.log"
 
 echo ====================================================================== >> "%logfile%"
 echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
@@ -202,9 +223,32 @@ if %errorlevel% equ 0 (
     echo [%time%] Generazione report Speccy... >> "%logfile%"
     echo Generazione report Speccy...
     set "COMPUTERNAME=%COMPUTERNAME%"
-    for /f "tokens=1-3 delims=/" %%a in ('date /t') do (set reportdate=%%c%%a%%b)
-    for /f "tokens=1-2 delims=:" %%a in ('time /t') do (set reporttime=%%a%%b)
-    set "reportfile=Speccy_Report_%COMPUTERNAME%_%reportdate%_%reporttime%.txt"
+    
+    REM Usa lo stesso formato per il report Speccy
+    for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
+        set "report_year=%%c"
+        set "report_month=%%a"
+        set "report_day=%%b"
+    )
+    for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
+        set "report_hour=%%a"
+        set "report_minute=%%b"
+    )
+    
+    REM Rimuove tutti gli spazi
+    set "report_year=!report_year: =!"
+    set "report_month=!report_month: =!"
+    set "report_day=!report_day: =!"
+    set "report_hour=!report_hour: =!"
+    set "report_minute=!report_minute: =!"
+    
+    REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
+    if "!report_month!" lss "10" set "report_month=0!report_month!"
+    if "!report_day!" lss "10" set "report_day=0!report_day!"
+    if "!report_hour!" lss "10" set "report_hour=0!report_hour!"
+    if "!report_minute!" lss "10" set "report_minute=0!report_minute!"
+    
+    set "reportfile=Speccy_Report_%COMPUTERNAME%_!report_year!-!report_month!-!report_day!_!report_hour!-!report_minute!.txt"
     speccy.exe /silent "%USERPROFILE%\Desktop\%reportfile%"
     if exist "%USERPROFILE%\Desktop\%reportfile%" (
         echo [%time%] ✓ Report Speccy creato >> "%logfile%"
