@@ -386,7 +386,8 @@ echo ======================================================================
 echo.
 if !INSTALL_ONLY_BASE!==1 (
     echo ✓ Software base installati
-    echo ✓ Report Speccy generato sul Desktop
+    @rem ATTUALMENTE IL REPORT NON VIENE EFFETTIVAMENTE PRODOTTO...
+    @rem echo ✓ Report Speccy generato sul Desktop
     echo ✓ Supremo scaricato sul Desktop
     @rem echo ✓ Collegamento WinUtil creato nel Menu Start
 ) else (
