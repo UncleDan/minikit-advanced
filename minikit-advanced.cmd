@@ -13,6 +13,48 @@ set "SCRIPT_FULLNAME=%~nx0"
 set "SCRIPT_NAME_NOEXT=%~n0"
 set "SCRIPT_PATH=%~dp0"
 
+REM Controlla se *NON* ci sono parametri
+if "%~1"=="" goto NO_PARAMS
+
+REM Se ci sono, analizza i parametri
+set "INSTALL_ONLY_BASE=0"
+set "INSTALL_POWERSHELL=0"
+set "INSTALL_VEEAM=0"
+set "INSTALL_FIREFOX=0"
+set "INSTALL_THUNDERBIRD=0"
+set "INSTALL_NOTEPAD=0"
+set "INSTALL_TEAMVIEWER=0"
+set "INSTALL_VSCODE=0"
+
+:PARSE_LOOP
+if "%~1"=="" goto MAIN
+if /i "%~1"=="-p" set "INSTALL_POWERSHELL=1"
+if /i "%~1"=="--powershell" set "INSTALL_POWERSHELL=1"
+if /i "%~1"=="-b" set "INSTALL_VEEAM=1"
+if /i "%~1"=="--backup" set "INSTALL_VEEAM=1"
+if /i "%~1"=="-f" set "INSTALL_FIREFOX=1"
+if /i "%~1"=="--firefox" set "INSTALL_FIREFOX=1"
+if /i "%~1"=="-r" set "INSTALL_THUNDERBIRD=1"
+if /i "%~1"=="--thunderbird" set "INSTALL_THUNDERBIRD=1"
+if /i "%~1"=="-n" set "INSTALL_NOTEPAD=1"
+if /i "%~1"=="--notepad" set "INSTALL_NOTEPAD=1"
+if /i "%~1"=="-t" set "INSTALL_TEAMVIEWER=1"
+if /i "%~1"=="--teamviewer" set "INSTALL_TEAMVIEWER=1"
+if /i "%~1"=="-v" set "INSTALL_VSCODE=1"
+if /i "%~1"=="--vscode" set "INSTALL_VSCODE=1"
+if /i "%~1"=="-w" goto RUN_WINUTIL
+if /i "%~1"=="--winutil" goto RUN_WINUTIL
+if /i "%~1"=="-h" goto SHOW_HELP
+if /i "%~1"=="--help" goto SHOW_HELP
+if /i "%~1"=="/?" goto SHOW_HELP
+
+shift
+goto PARSE_LOOP
+
+:NO_PARAMS
+set "INSTALL_ONLY_BASE=1"
+
+:MAIN
 REM Configurazione percorso e nome file log con formato migliorato
 for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
     set "year=%%c"
@@ -39,15 +81,6 @@ if "!minute!" lss "10" set "minute=0!minute!"
 
 set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_!year!-!month!-!day!_!hour!-!minute!.log"
 
-echo ====================================================================== >> "%logfile%"
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
-echo ====================================================================== >> "%logfile%"
-echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS >> "%logfile%"
-echo ====================================================================== >> "%logfile%"
-echo Log: %logfile% >> "%logfile%"
-echo. >> "%logfile%"
-
-:MAIN
 cls
 echo ======================================================================
 echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
@@ -57,66 +90,48 @@ echo ======================================================================
 echo Log: %logfile%
 echo.
 
-REM Verifica se sono stati passati parametri
-if "%~1"=="" goto NO_PARAMS
+echo ====================================================================== >> "%logfile%"
+echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
+echo ====================================================================== >> "%logfile%"
+echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS >> "%logfile%"
+echo ====================================================================== >> "%logfile%"
+echo Log: %logfile% >> "%logfile%"
+echo. >> "%logfile%"
 
-REM Analizza i parametri
-set "INSTALL_POWERSHELL=0"
-set "INSTALL_VEEAM=0"
-set "INSTALL_FIREFOX=0"
-set "INSTALL_THUNDERBIRD=0"
-set "INSTALL_NOTEPAD=0"
-set "INSTALL_TEAMVIEWER=0"
-set "INSTALL_VSCODE=0"
-set "RUN_WINUTIL=0"
+if !INSTALL_ONLY_BASE!==1 (
+    echo NESSUN PARAMETRO: Installazione SOLO software base
+    echo ----------------------------------------------------------------------
+    echo.
 
-:PARSE_LOOP
-if "%~1"=="" goto PARSE_DONE
+    echo [%time%] NESSUN PARAMETRO: Installazione SOLO software base >> "%logfile%"
+    echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
 
-if /i "%~1"=="-p" set "INSTALL_POWERSHELL=1"
-if /i "%~1"=="--powershell" set "INSTALL_POWERSHELL=1"
-if /i "%~1"=="-b" set "INSTALL_VEEAM=1"
-if /i "%~1"=="--backup" set "INSTALL_VEEAM=1"
-if /i "%~1"=="-f" set "INSTALL_FIREFOX=1"
-if /i "%~1"=="--firefox" set "INSTALL_FIREFOX=1"
-if /i "%~1"=="-r" set "INSTALL_THUNDERBIRD=1"
-if /i "%~1"=="--thunderbird" set "INSTALL_THUNDERBIRD=1"
-if /i "%~1"=="-n" set "INSTALL_NOTEPAD=1"
-if /i "%~1"=="--notepad" set "INSTALL_NOTEPAD=1"
-if /i "%~1"=="-t" set "INSTALL_TEAMVIEWER=1"
-if /i "%~1"=="--teamviewer" set "INSTALL_TEAMVIEWER=1"
-if /i "%~1"=="-v" set "INSTALL_VSCODE=1"
-if /i "%~1"=="--vscode" set "INSTALL_VSCODE=1"
-if /i "%~1"=="-w" set "RUN_WINUTIL=1"
-if /i "%~1"=="--winutil" set "RUN_WINUTIL=1"
-if /i "%~1"=="-h" goto SHOW_HELP
-if /i "%~1"=="--help" goto SHOW_HELP
-if /i "%~1"=="/?" goto SHOW_HELP
+) else (
+    echo PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati
+    echo CONFIGURAZIONE INSTALLAZIONE:
+    echo    Software base: NO
+    echo    Software opzionali: SI
+    echo ----------------------------------------------------------------------
+    echo.
 
-shift
-goto PARSE_LOOP
+    echo [%time%] PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati >> "%logfile%"
+    echo [%time%] CONFIGURAZIONE INSTALLAZIONE: >> "%logfile%"
+    echo [%time%]   Software base: NO >> "%logfile%"
 
-:PARSE_DONE
-echo [%time%] PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati >> "%logfile%"
-echo [%time%] CONFIGURAZIONE INSTALLAZIONE: >> "%logfile%"
-echo [%time%]   Software base: NO >> "%logfile%"
+    set "OPTIONAL_COUNT=0"
+    if !INSTALL_POWERSHELL!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   PowerShell: SI >> "%logfile%"
+    if !INSTALL_VEEAM!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Veeam Agent: SI >> "%logfile%"
+    if !INSTALL_FIREFOX!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Firefox: SI >> "%logfile%"
+    if !INSTALL_THUNDERBIRD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Thunderbird: SI >> "%logfile%"
+    if !INSTALL_NOTEPAD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Notepad++: SI >> "%logfile%"
+    if !INSTALL_TEAMVIEWER!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   TeamViewer: SI >> "%logfile%"
+    if !INSTALL_VSCODE!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   VS Code: SI >> "%logfile%"
 
-set "OPTIONAL_COUNT=0"
-if !INSTALL_POWERSHELL!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   PowerShell: SI >> "%logfile%"
-if !INSTALL_VEEAM!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Veeam Agent: SI >> "%logfile%"
-if !INSTALL_FIREFOX!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Firefox: SI >> "%logfile%"
-if !INSTALL_THUNDERBIRD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Thunderbird: SI >> "%logfile%"
-if !INSTALL_NOTEPAD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Notepad++: SI >> "%logfile%"
-if !INSTALL_TEAMVIEWER!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   TeamViewer: SI >> "%logfile%"
-if !INSTALL_VSCODE!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   VS Code: SI >> "%logfile%"
-echo [%time%]   Software opzionali selezionati: !OPTIONAL_COUNT! >> "%logfile%"
-if !RUN_WINUTIL!==1 (echo [%time%]   WinUtil: SI >> "%logfile%") else (echo [%time%]   WinUtil: NO >> "%logfile%")
-echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
+    echo [%time%]   Software opzionali selezionati: !OPTIONAL_COUNT! >> "%logfile%"
+    echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
 
-goto CHECK_WINGET
+)
 
-:NO_PARAMS
-echo [%time%] NESSUN PARAMETRO: Installazione SOLO software base >> "%logfile%"
 goto CHECK_WINGET
 
 :SHOW_HELP
@@ -150,11 +165,28 @@ echo   PowerShell, Veeam Agent, Firefox IT, Thunderbird IT
 echo   Notepad++ IT, TeamViewer IT, Visual Studio Code
 echo.
 echo ESEMPI:
-echo   %SCRIPT_FULLNAME%                    - Solo software base
+echo   %SCRIPT_FULLNAME%                    - Tutto e solo software base
 echo   %SCRIPT_FULLNAME% -p -b -f           - Solo PowerShell + Veeam + Firefox
 echo   %SCRIPT_FULLNAME% -n -t -v           - Solo Notepad++ + TeamViewer + VS Code
-echo   %SCRIPT_FULLNAME% -f -r -w           - Solo Firefox + Thunderbird + WinUtil
+echo   %SCRIPT_FULLNAME% -f -r              - Solo Firefox + Thunderbird
+echo   %SCRIPT_FULLNAME% -w                 - Esegui Chris Titus Tech WinUtil
+echo   %SCRIPT_FULLNAME% -h                 - Visualizza questa guida
 echo.
+goto EOF
+
+:RUN_WINUTIL
+echo Avvio WinUtil...
+powershell -Command "irm https://christitus.com/win | iex"
+if %errorlevel% equ 0 (
+    echo.
+    echo ✓ WinUtil eseguito
+    echo.
+) else (
+    echo.
+    echo ✗ ERRORE: Impossibile eseguire WinUtil
+    echo.
+    pause
+)
 goto EOF
 
 :CHECK_WINGET
@@ -167,7 +199,7 @@ if %errorlevel% equ 0 (
     echo [%time%] ✗ Winget non disponibile >> "%logfile%"
     echo [%time%] ERRORE: Impossibile procedere senza Winget >> "%logfile%"
     echo.
-    echo ERRORE: Impossibile procedere senza Winget
+    echo ✗ ERRORE: Impossibile procedere senza Winget
     echo.
     pause
     goto EOF
@@ -184,7 +216,7 @@ if %errorlevel% equ 0 (
 )
 
 REM Installa in base ai parametri
-if "%~1"=="" (
+if !INSTALL_ONLY_BASE!==1 (
     goto INSTALL_BASE
 ) else (
     goto INSTALL_OPTIONAL
@@ -248,7 +280,7 @@ if %errorlevel% equ 0 (
     if "!report_minute!" lss "10" set "report_minute=0!report_minute!"
     
     set "reportfile=Speccy_Report_%COMPUTERNAME%_!report_year!-!report_month!-!report_day!_!report_hour!-!report_minute!.txt"
-    "C:\Program Files\Speccy\Speccy.exe" /silent "%USERPROFILE%\Desktop\%reportfile%"
+    "C:\Program Files\Speccy\Speccy.exe" /silent /report_txt:"%USERPROFILE%\Desktop\%reportfile%"
     if exist "%USERPROFILE%\Desktop\%reportfile%" (
         echo [%time%] ✓ Report Speccy creato >> "%logfile%"
     ) else (
@@ -330,13 +362,6 @@ if !INSTALL_VSCODE!==1 (
     if %errorlevel% equ 0 (echo [%time%] ✓ VS Code installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione VS Code >> "%logfile%")
 )
 
-if !RUN_WINUTIL!==1 (
-    echo [%time%] Avvio WinUtil... >> "%logfile%"
-    echo Avvio WinUtil...
-    powershell -WindowStyle Hidden -Command "irm https://christitus.com/win | iex"
-    if %errorlevel% equ 0 (echo [%time%] ✓ WinUtil avviato >> "%logfile%") else (echo [%time%] ✗ Errore avvio WinUtil >> "%logfile%")
-)
-
 :CREATE_WINUTIL
 @rem TEMPORARILY DISABLED AS IT DOESN'T WORK
 @rem echo [%time%] Creazione collegamento WinUtil... >> "%logfile%"
@@ -359,11 +384,11 @@ echo ======================================================================
 echo %SCRIPT_NAME% v%SCRIPT_VERSION% - INSTALLAZIONE COMPLETATA
 echo ======================================================================
 echo.
-if "%~1"=="" (
+if !INSTALL_ONLY_BASE!==1 (
     echo ✓ Software base installati
     echo ✓ Report Speccy generato sul Desktop
     echo ✓ Supremo scaricato sul Desktop
-@rem     echo ✓ Collegamento WinUtil creato nel Menu Start
+    @rem echo ✓ Collegamento WinUtil creato nel Menu Start
 ) else (
     echo ✓ Software opzionali installati
 )
