@@ -103,9 +103,9 @@ Le contribuzioni sono benvenute! Per contribuire:
 Distribuito sotto licenza MIT. Vedi LICENSE per maggiori informazioni.
 
 ## 👨‍💻 Autore
-Daniele Lolli (UncleDan)
-Email: uncledan@uncledan.it
-Sito Web: https://uncledan.it
+* **Daniele Lolli (UncleDan)**
+* Email: uncledan@uncledan.it
+* Sito Web: https://www.uncledan.it
 
 ## 🙏 Ringraziamenti
 * **Chris Titus** per WinUtil
