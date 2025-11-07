@@ -42,26 +42,26 @@
 
 ### Installazione tutto software base
 ```cmd
-Mini-Kit_Advanced.bat
+minikit-advanced.cmd
 ```
 
 ### Installazione software opzionali specifici
 ```cmd
 REM Solo PowerShell + Veeam + Firefox
-Mini-Kit_Advanced.bat -p -b -f
+minikit-advanced.cmd -p -b -f
 
 REM Solo Notepad++ + TeamViewer + VS Code
-Mini-Kit_Advanced.bat -n -t -v
+minikit-advanced.cmd -n -t -v
 
 REM Solo Firefox + Thunderbird
-Mini-Kit_Advanced.bat -f -r
+minikit-advanced.cmd -f -r
 Altre opzioni
 cmd
 REM Esegui Chris Titus Tech WinUtil
-Mini-Kit_Advanced.bat -w
+minikit-advanced.cmd -w
 
 REM Mostra guida
-Mini-Kit_Advanced.bat -h
+minikit-advanced.cmd -h
 ```
 
 ## 📋 Tabella Comandi Completa
