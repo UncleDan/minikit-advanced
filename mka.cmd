@@ -196,10 +196,10 @@ echo   %SCRIPT_FULLNAME% [OPZIONI]
 echo.
 echo OPZIONI:
 echo   -7, --7zip         Installa 7-Zip
-echo   -a, --adobe        Installa Adobe Reader (italiano)
-echo   -c, --chrome       Installa Google Chrome (italiano)
+echo   -a, --adobe        Installa Adobe Reader
+echo   -c, --chrome       Installa Google Chrome
 echo   -s, --speccy       Installa Speccy
-echo   -l, --libreoffice  Installa LibreOffice (italiano)
+echo   -l, --libreoffice  Installa LibreOffice 
 echo   -d, --supremo      Scarica Supremo Remote Desktop
 echo.
 echo   -k, --kit          Installa kit base + aggiornamento
@@ -208,9 +208,9 @@ echo   -p, --powershell   Installa PowerShell
 echo   -b, --backup       Installa Veeam Agent
 echo   -f, --firefox      Installa Mozilla Firefox (italiano)
 echo   -r, --thunderbird  Installa Mozilla Thunderbird (italiano)
-echo   -n, --notepad      Installa Notepad++ (italiano)
+echo   -n, --notepad      Installa Notepad++
 echo   -e, --freefilesync Installa FreeFileSync
-echo   -t, --teamviewer   Installa TeamViewer (italiano)
+echo   -t, --teamviewer   Installa TeamViewer
 echo   -v, --vscode       Installa Visual Studio Code
 echo   -w, --winutil      Esegue Chris Titus Tech WinUtil
 echo   -u, --update       Aggiorna pacchetti prima di installare
