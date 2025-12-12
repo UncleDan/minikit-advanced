@@ -30,19 +30,6 @@ echo ======================================================================
 REM Se nessun parametro, mostra help
 if "%~1"=="" goto SHOW_HELP
 
-REM Inizializza il file log
-echo Log: %logfile%
-echo.
-(
-echo ======================================================================
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
-echo ======================================================================
-echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
-echo ======================================================================
-echo Data esecuzione: !year!-!month!-!day! !hour!:!minute!
-echo. 
-) > "%logfile%"
-
 REM Inizializza variabili per le opzioni
 set "INSTALL_7ZIP=0"
 set "INSTALL_ADOBE=0"
@@ -64,8 +51,19 @@ set "UPDATE_PKGS=0"
 
 REM Parsa tutti i parametri
 :PARSE_LOOP
-if /i "%~1"=="-h" goto SHOW_HELP
-if /i "%~1"=="--help" goto SHOW_HELP
+
+REM Inizializza il file log
+echo Log: %logfile%
+echo.
+(
+echo ======================================================================
+echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
+echo ======================================================================
+echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
+echo ======================================================================
+echo Data esecuzione: !year!-!month!-!day! !hour!:!minute!
+echo. 
+) > "%logfile%"
 
 if "%~1"=="" goto PARSE_DONE
 
@@ -216,7 +214,6 @@ echo   -t, --teamviewer   Installa TeamViewer (italiano)
 echo   -v, --vscode       Installa Visual Studio Code
 echo   -w, --winutil      Esegue Chris Titus Tech WinUtil
 echo   -u, --update       Aggiorna pacchetti prima di installare
-echo   -h, --help         Mostra questo aiuto
 echo.
 echo NOTA: Il kit base (-k) include automaticamente l'aggiornamento (-u)
 echo.
