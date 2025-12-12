@@ -45,6 +45,7 @@ set "INSTALL_NOTEPAD=0"
 set "INSTALL_FREEFILESYNC=0"
 set "INSTALL_TEAMVIEWER=0"
 set "INSTALL_VSCODE=0"
+set "INSTALL_VIDEOLAN=0"
 set "RUN_WINUTIL=0"
 set "INSTALL_KIT=0"
 set "UPDATE_PKGS=0"
@@ -113,6 +114,9 @@ if /i "%~1"=="--teamviewer" set "INSTALL_TEAMVIEWER=1"
 
 if /i "%~1"=="-v" set "INSTALL_VSCODE=1"
 if /i "%~1"=="--vscode" set "INSTALL_VSCODE=1"
+
+if /i "%~1"=="-o" set "INSTALL_VIDEOLAN=1"
+if /i "%~1"=="--vlc" set "INSTALL_VIDEOLAN=1"
 
 if /i "%~1"=="-w" set "RUN_WINUTIL=1"
 if /i "%~1"=="--winutil" set "RUN_WINUTIL=1"
@@ -185,6 +189,7 @@ if "!INSTALL_NOTEPAD!"=="1" call :INSTALL_NOTEPAD
 if "!INSTALL_FREEFILESYNC!"=="1" call :INSTALL_FREEFILESYNC
 if "!INSTALL_TEAMVIEWER!"=="1" call :INSTALL_TEAMVIEWER
 if "!INSTALL_VSCODE!"=="1" call :INSTALL_VSCODE
+if "!INSTALL_VIDEOLAN!"=="1" call :INSTALL_VIDEOLAN
 if "!RUN_WINUTIL!"=="1" call :RUN_WINUTIL
 
 goto COMPLETED
@@ -419,6 +424,19 @@ if !errorlevel! equ 0 (
 ) else (
     echo [%time%] ✗ Errore installazione VS Code >> "%logfile%"
     echo ✗ Errore installazione VS Code
+)
+exit /b
+
+:INSTALL_VIDEOLAN
+echo [%time%] Installazione VideoLAN Client... >> "%logfile%"
+echo Installazione VideoLAN Client...
+winget install -h --id VideoLAN.VLC -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ VideoLAN Client >> "%logfile%"
+    echo ✓ VideoLAN Client installato
+) else (
+    echo [%time%] ✗ Errore installazione VideoLAN Client >> "%logfile%"
+    echo ✗ Errore installazione VideoLAN Client
 )
 exit /b
 
