@@ -27,6 +27,16 @@ echo ======================================================================
 echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
 echo ======================================================================
 
+echo Verifica privilegi amministrativi...
+NET SESSION >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    echo ERRORE: Questo script richiede privilegi di amministratore!
+    echo.
+    exit /b 1
+)
+echo ✓ Privilegi amministrativi verificati
+echo.
+
 REM Se nessun parametro, mostra help
 if "%~1"=="" goto SHOW_HELP
 
