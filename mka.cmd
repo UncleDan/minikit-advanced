@@ -1,84 +1,23 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Mini-Kit Advanced v25.11 by Daniele Lolli (UncleDan)
-REM Script di installazione software per Windows - Modalità Batch
-
+REM Mini-Kit Advanced by Daniele Lolli (UncleDan)
 set "SCRIPT_NAME=Mini-Kit Advanced"
 set "SCRIPT_AUTHOR=Daniele Lolli (UncleDan)"
-set "SCRIPT_VERSION=25.11"
-
-REM Ottiene il nome completo del file in esecuzione e il percorso
+set "SCRIPT_VERSION=25.12"
 set "SCRIPT_FULLNAME=%~nx0"
 set "SCRIPT_NAME_NOEXT=%~n0"
 set "SCRIPT_PATH=%~dp0"
+set "SUPREMO_URL=https://www.nanosystems.it/public/download/Supremo.exe"
+set "FREEFILESYNC_URL=https://freefilesync.org/download/FreeFileSync_14.6_Windows_Setup.exe"
 
-REM Controlla se *NON* ci sono parametri
-if "%~1"=="" goto NO_PARAMS
-
-REM Se ci sono, analizza i parametri
-set "INSTALL_ONLY_BASE=0"
-set "INSTALL_POWERSHELL=0"
-set "INSTALL_VEEAM=0"
-set "INSTALL_FIREFOX=0"
-set "INSTALL_THUNDERBIRD=0"
-set "INSTALL_NOTEPAD=0"
-set "INSTALL_TEAMVIEWER=0"
-set "INSTALL_VSCODE=0"
-
-:PARSE_LOOP
-if "%~1"=="" goto MAIN
-if /i "%~1"=="-p" set "INSTALL_POWERSHELL=1"
-if /i "%~1"=="--powershell" set "INSTALL_POWERSHELL=1"
-if /i "%~1"=="-b" set "INSTALL_VEEAM=1"
-if /i "%~1"=="--backup" set "INSTALL_VEEAM=1"
-if /i "%~1"=="-f" set "INSTALL_FIREFOX=1"
-if /i "%~1"=="--firefox" set "INSTALL_FIREFOX=1"
-if /i "%~1"=="-r" set "INSTALL_THUNDERBIRD=1"
-if /i "%~1"=="--thunderbird" set "INSTALL_THUNDERBIRD=1"
-if /i "%~1"=="-n" set "INSTALL_NOTEPAD=1"
-if /i "%~1"=="--notepad" set "INSTALL_NOTEPAD=1"
-if /i "%~1"=="-t" set "INSTALL_TEAMVIEWER=1"
-if /i "%~1"=="--teamviewer" set "INSTALL_TEAMVIEWER=1"
-if /i "%~1"=="-v" set "INSTALL_VSCODE=1"
-if /i "%~1"=="--vscode" set "INSTALL_VSCODE=1"
-if /i "%~1"=="-w" goto RUN_WINUTIL
-if /i "%~1"=="--winutil" goto RUN_WINUTIL
-if /i "%~1"=="-h" goto SHOW_HELP
-if /i "%~1"=="--help" goto SHOW_HELP
-if /i "%~1"=="/?" goto SHOW_HELP
-
-shift
-goto PARSE_LOOP
-
-:NO_PARAMS
-set "INSTALL_ONLY_BASE=1"
-
-:MAIN
-REM Configurazione percorso e nome file log con formato migliorato
-for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
-    set "year=%%c"
-    set "month=%%a"
-    set "day=%%b"
-)
-for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
-    set "hour=%%a"
-    set "minute=%%b"
-)
-
-REM Rimuove tutti gli spazi
-set "year=!year: =!"
-set "month=!month: =!"
-set "day=!day: =!"
-set "hour=!hour: =!"
-set "minute=!minute: =!"
-
-REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
-if "!month!" lss "10" set "month=0!month!"
-if "!day!" lss "10" set "day=0!day!"
-if "!hour!" lss "10" set "hour=0!hour!"
-if "!minute!" lss "10" set "minute=0!minute!"
-
+REM Configura data per log
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set "datetime=%%I"
+set "year=!datetime:~0,4!"
+set "month=!datetime:~4,2!"
+set "day=!datetime:~6,2!"
+set "hour=!datetime:~8,2!"
+set "minute=!datetime:~10,2!"
 set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_!year!-!month!-!day!_!hour!-!minute!.log"
 
 cls
@@ -87,312 +26,430 @@ echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
 echo ======================================================================
 echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
 echo ======================================================================
+
+REM Se nessun parametro, mostra help
+if "%~1"=="" goto SHOW_HELP
+
+REM Inizializza il file log
 echo Log: %logfile%
 echo.
+(
+echo ======================================================================
+echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
+echo ======================================================================
+echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
+echo ======================================================================
+echo Data esecuzione: !year!-!month!-!day! !hour!:!minute!
+echo. 
+) > "%logfile%"
 
-echo ====================================================================== >> "%logfile%"
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
-echo ====================================================================== >> "%logfile%"
-echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS >> "%logfile%"
-echo ====================================================================== >> "%logfile%"
-echo Log: %logfile% >> "%logfile%"
-echo. >> "%logfile%"
+REM Inizializza variabili per le opzioni
+set "INSTALL_7ZIP=0"
+set "INSTALL_ADOBE=0"
+set "INSTALL_CHROME=0"
+set "INSTALL_SPECCY=0"
+set "INSTALL_LIBREOFFICE=0"
+set "DOWNLOAD_SUPREMO=0"
+set "INSTALL_POWERSHELL=0"
+set "INSTALL_VEEAM=0"
+set "INSTALL_FIREFOX=0"
+set "INSTALL_THUNDERBIRD=0"
+set "INSTALL_NOTEPAD=0"
+set "INSTALL_FREEFILESYNC=0"
+set "INSTALL_TEAMVIEWER=0"
+set "INSTALL_VSCODE=0"
+set "RUN_WINUTIL=0"
+set "INSTALL_KIT=0"
+set "UPDATE_PKGS=0"
 
-if !INSTALL_ONLY_BASE!==1 (
-    echo NESSUN PARAMETRO: Installazione SOLO software base
-    echo ----------------------------------------------------------------------
-    echo.
+REM Parsa tutti i parametri
+:PARSE_LOOP
+if /i "%~1"=="-h" goto SHOW_HELP
+if /i "%~1"=="--help" goto SHOW_HELP
 
-    echo [%time%] NESSUN PARAMETRO: Installazione SOLO software base >> "%logfile%"
-    echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
+if "%~1"=="" goto PARSE_DONE
 
-) else (
-    echo PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati
-    echo CONFIGURAZIONE INSTALLAZIONE:
-    echo    Software base: NO
-    echo    Software opzionali: SI
-    echo ----------------------------------------------------------------------
-    echo.
+echo [%time%] Analisi parametro: %~1 >> "%logfile%"
 
-    echo [%time%] PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati >> "%logfile%"
-    echo [%time%] CONFIGURAZIONE INSTALLAZIONE: >> "%logfile%"
-    echo [%time%]   Software base: NO >> "%logfile%"
+if /i "%~1"=="-7" set "INSTALL_7ZIP=1"
+if /i "%~1"=="--7zip" set "INSTALL_7ZIP=1"
 
-    set "OPTIONAL_COUNT=0"
-    if !INSTALL_POWERSHELL!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   PowerShell: SI >> "%logfile%"
-    if !INSTALL_VEEAM!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Veeam Agent: SI >> "%logfile%"
-    if !INSTALL_FIREFOX!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Firefox: SI >> "%logfile%"
-    if !INSTALL_THUNDERBIRD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Thunderbird: SI >> "%logfile%"
-    if !INSTALL_NOTEPAD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Notepad++: SI >> "%logfile%"
-    if !INSTALL_TEAMVIEWER!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   TeamViewer: SI >> "%logfile%"
-    if !INSTALL_VSCODE!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   VS Code: SI >> "%logfile%"
+if /i "%~1"=="-a" set "INSTALL_ADOBE=1"
+if /i "%~1"=="--adobe" set "INSTALL_ADOBE=1"
 
-    echo [%time%]   Software opzionali selezionati: !OPTIONAL_COUNT! >> "%logfile%"
-    echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
+if /i "%~1"=="-c" set "INSTALL_CHROME=1"
+if /i "%~1"=="--chrome" set "INSTALL_CHROME=1"
 
+if /i "%~1"=="-s" set "INSTALL_SPECCY=1"
+if /i "%~1"=="--speccy" set "INSTALL_SPECCY=1"
+
+if /i "%~1"=="-l" set "INSTALL_LIBREOFFICE=1"
+if /i "%~1"=="--libreoffice" set "INSTALL_LIBREOFFICE=1"
+
+if /i "%~1"=="-d" set "DOWNLOAD_SUPREMO=1"
+if /i "%~1"=="--supremo" set "DOWNLOAD_SUPREMO=1"
+
+if /i "%~1"=="-k" set "INSTALL_KIT=1"
+if /i "%~1"=="--kit" set "INSTALL_KIT=1"
+
+if /i "%~1"=="-p" set "INSTALL_POWERSHELL=1"
+if /i "%~1"=="--powershell" set "INSTALL_POWERSHELL=1"
+
+if /i "%~1"=="-b" set "INSTALL_VEEAM=1"
+if /i "%~1"=="--backup" set "INSTALL_VEEAM=1"
+
+if /i "%~1"=="-f" set "INSTALL_FIREFOX=1"
+if /i "%~1"=="--firefox" set "INSTALL_FIREFOX=1"
+
+if /i "%~1"=="-r" set "INSTALL_THUNDERBIRD=1"
+if /i "%~1"=="--thunderbird" set "INSTALL_THUNDERBIRD=1"
+
+if /i "%~1"=="-n" set "INSTALL_NOTEPAD=1"
+if /i "%~1"=="--notepad" set "INSTALL_NOTEPAD=1"
+
+if /i "%~1"=="-e" set "INSTALL_FREEFILESYNC=1"
+if /i "%~1"=="--freefilesync" set "INSTALL_FREEFILESYNC=1"
+
+if /i "%~1"=="-t" set "INSTALL_TEAMVIEWER=1"
+if /i "%~1"=="--teamviewer" set "INSTALL_TEAMVIEWER=1"
+
+if /i "%~1"=="-v" set "INSTALL_VSCODE=1"
+if /i "%~1"=="--vscode" set "INSTALL_VSCODE=1"
+
+if /i "%~1"=="-w" set "RUN_WINUTIL=1"
+if /i "%~1"=="--winutil" set "RUN_WINUTIL=1"
+
+if /i "%~1"=="-u" set "UPDATE_PKGS=1"
+if /i "%~1"=="--update" set "UPDATE_PKGS=1"
+
+shift
+goto PARSE_LOOP
+
+:PARSE_DONE
+
+REM Verifica Winget prima di procedere
+echo Verifica Winget...
+winget --version >nul 2>&1
+if errorlevel 1 (
+    echo ERRORE: Winget non trovato!
+    echo [%time%] ✗ ERRORE: Winget non trovato >> "%logfile%"
+    echo Installare Windows Package Manager per continuare.
+    pause
+    goto EOF
 )
 
-goto CHECK_WINGET
+echo ✓ Winget trovato. Inizio installazioni...
+echo [%time%] ✓ Winget trovato >> "%logfile%"
+echo.
+
+REM Se richiesto kit completo
+if "!INSTALL_KIT!"=="1" (
+    echo [Kit] Installazione pacchetto completo...
+    echo [%time%] [Kit] Installazione pacchetto completo >> "%logfile%"
+    set "INSTALL_7ZIP=1"
+    set "INSTALL_ADOBE=1"
+    set "INSTALL_CHROME=1"
+    set "INSTALL_SPECCY=1"
+    set "INSTALL_LIBREOFFICE=1"
+    set "DOWNLOAD_SUPREMO=1"
+    set "UPDATE_PKGS=1"
+)
+
+REM Aggiornamento pacchetti se richiesto
+if "!UPDATE_PKGS!"=="1" (
+    echo Aggiornamento pacchetti in corso...
+    echo [%time%] Aggiornamento pacchetti winget >> "%logfile%"
+    call :UPDATE_PACKAGES
+)
+
+REM Aggiornamento automatico se incluso nel kit
+if "!UPDATE_PKGS!"=="1" (
+    if not defined KIT_UPDATED (
+        echo Aggiornamento pacchetti (incluso nel kit)...
+        echo [%time%] Aggiornamento pacchetti (kit) >> "%logfile%"
+        call :UPDATE_PACKAGES
+        set "KIT_UPDATED=1"
+    )
+)
+
+REM Esegue le installazioni in base ai flag
+if "!INSTALL_7ZIP!"=="1" call :INSTALL_7ZIP
+if "!INSTALL_ADOBE!"=="1" call :INSTALL_ADOBE_READER
+if "!INSTALL_CHROME!"=="1" call :INSTALL_GOOGLE_CHROME
+if "!INSTALL_SPECCY!"=="1" call :INSTALL_SPECCY
+if "!INSTALL_LIBREOFFICE!"=="1" call :INSTALL_LIBREOFFICE
+if "!DOWNLOAD_SUPREMO!"=="1" call :DOWNLOAD_SUPREMO
+if "!INSTALL_POWERSHELL!"=="1" call :INSTALL_POWERSHELL
+if "!INSTALL_VEEAM!"=="1" call :INSTALL_VEEAM
+if "!INSTALL_FIREFOX!"=="1" call :INSTALL_FIREFOX
+if "!INSTALL_THUNDERBIRD!"=="1" call :INSTALL_THUNDERBIRD
+if "!INSTALL_NOTEPAD!"=="1" call :INSTALL_NOTEPAD
+if "!INSTALL_FREEFILESYNC!"=="1" call :INSTALL_FREEFILESYNC
+if "!INSTALL_TEAMVIEWER!"=="1" call :INSTALL_TEAMVIEWER
+if "!INSTALL_VSCODE!"=="1" call :INSTALL_VSCODE
+if "!RUN_WINUTIL!"=="1" call :RUN_WINUTIL
+
+goto COMPLETED
 
 :SHOW_HELP
-echo.
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
 echo.
 echo USO:
 echo   %SCRIPT_FULLNAME% [OPZIONI]
 echo.
 echo OPZIONI:
-echo   -p, --powershell    Installa PowerShell
-echo   -b, --backup        Installa Veeam Agent per backup
-echo   -f, --firefox       Installa Mozilla Firefox ^(italiano^)
-echo   -r, --thunderbird   Installa Mozilla Thunderbird ^(italiano^)
-echo   -n, --notepad       Installa Notepad++ ^(italiano^)
-echo   -t, --teamviewer    Installa TeamViewer ^(italiano^)
-echo   -v, --vscode        Installa Visual Studio Code
-echo   -w, --winutil       Esegue Chris Titus Tech WinUtil
-echo   -h, --help          Mostra questo aiuto
+echo   -7, --7zip         Installa 7-Zip
+echo   -a, --adobe        Installa Adobe Reader (italiano)
+echo   -c, --chrome       Installa Google Chrome (italiano)
+echo   -s, --speccy       Installa Speccy
+echo   -l, --libreoffice  Installa LibreOffice (italiano)
+echo   -d, --supremo      Scarica Supremo Remote Desktop
 echo.
-echo LOGICA INSTALLAZIONE:
-echo   • SENZA parametri: Installa SOLO software base
-echo   • CON parametri:   Installa SOLO software opzionali specificati ^(NO base^)
+echo   -k, --kit          Installa kit base + aggiornamento
 echo.
-echo SOFTWARE BASE ^(solo senza parametri^):
-echo   7-Zip, Adobe Reader IT, Google Chrome IT, Speccy
-echo   LibreOffice IT, Supremo Remote Desktop
+echo   -p, --powershell   Installa PowerShell
+echo   -b, --backup       Installa Veeam Agent
+echo   -f, --firefox      Installa Mozilla Firefox (italiano)
+echo   -r, --thunderbird  Installa Mozilla Thunderbird (italiano)
+echo   -n, --notepad      Installa Notepad++ (italiano)
+echo   -e, --freefilesync Installa FreeFileSync
+echo   -t, --teamviewer   Installa TeamViewer (italiano)
+echo   -v, --vscode       Installa Visual Studio Code
+echo   -w, --winutil      Esegue Chris Titus Tech WinUtil
+echo   -u, --update       Aggiorna pacchetti prima di installare
+echo   -h, --help         Mostra questo aiuto
 echo.
-echo SOFTWARE OPZIONALI ^(solo con parametri^):
-echo   PowerShell, Veeam Agent, Firefox IT, Thunderbird IT
-echo   Notepad++ IT, TeamViewer IT, Visual Studio Code
-echo.
-echo ESEMPI:
-echo   %SCRIPT_FULLNAME%                    - Tutto e solo software base
-echo   %SCRIPT_FULLNAME% -p -b -f           - Solo PowerShell + Veeam + Firefox
-echo   %SCRIPT_FULLNAME% -n -t -v           - Solo Notepad++ + TeamViewer + VS Code
-echo   %SCRIPT_FULLNAME% -f -r              - Solo Firefox + Thunderbird
-echo   %SCRIPT_FULLNAME% -w                 - Esegui Chris Titus Tech WinUtil
-echo   %SCRIPT_FULLNAME% -h                 - Visualizza questa guida
+echo NOTA: Il kit base (-k) include automaticamente l'aggiornamento (-u)
 echo.
 goto EOF
 
-:RUN_WINUTIL
-echo Avvio WinUtil...
-powershell -Command "irm https://christitus.com/win | iex"
-if %errorlevel% equ 0 (
-    echo.
-    echo ✓ WinUtil eseguito
-    echo.
-) else (
-    echo.
-    echo ✗ ERRORE: Impossibile eseguire WinUtil
-    echo.
-    pause
-)
-goto EOF
-
-:CHECK_WINGET
-echo [%time%] Verifica Winget... >> "%logfile%"
-winget --version >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [%time%] ✓ Winget trovato >> "%logfile%"
-    goto UPDATE_PACKAGES
-) else (
-    echo [%time%] ✗ Winget non disponibile >> "%logfile%"
-    echo [%time%] ERRORE: Impossibile procedere senza Winget >> "%logfile%"
-    echo.
-    echo ✗ ERRORE: Impossibile procedere senza Winget
-    echo.
-    pause
-    goto EOF
-)
-
+REM --- FUNZIONE AGGIORNAMENTO PACCHETTI ---
 :UPDATE_PACKAGES
 echo [%time%] Aggiornamento pacchetti... >> "%logfile%"
 echo Aggiornamento pacchetti winget in corso...
 winget update --all --include-unknown --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (
+if !errorlevel! equ 0 (
     echo [%time%] ✓ Aggiornamento completato >> "%logfile%"
+    echo ✓ Aggiornamento completato
 ) else (
     echo [%time%] ✗ Errore aggiornamento >> "%logfile%"
+    echo ✗ Errore aggiornamento
 )
+exit /b
 
-REM Installa in base ai parametri
-if !INSTALL_ONLY_BASE!==1 (
-    goto INSTALL_BASE
-) else (
-    goto INSTALL_OPTIONAL
-)
-
-:INSTALL_BASE
-echo [%time%] INSTALLAZIONE SOFTWARE BASE... >> "%logfile%"
-echo.
-echo INSTALLAZIONE SOFTWARE BASE...
-
-REM 7-Zip
-echo [%time%] Installando 7-Zip... >> "%logfile%"
-echo Installando 7-Zip...
+REM --- FUNZIONI DI INSTALLAZIONE CON LOG ERRORI ---
+:INSTALL_7ZIP
+echo [%time%] Installazione 7-Zip... >> "%logfile%"
+echo Installazione 7-Zip...
 winget install -h --id 7zip.7zip --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ 7-Zip installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione 7-Zip >> "%logfile%")
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ 7-Zip installato >> "%logfile%"
+    echo ✓ 7-Zip installato
+) else (
+    echo [%time%] ✗ Errore installazione 7-Zip >> "%logfile%"
+    echo ✗ Errore installazione 7-Zip
+)
+exit /b
 
-REM Adobe Reader IT
-echo [%time%] Installando Adobe Reader IT... >> "%logfile%"
-echo Installando Adobe Reader IT...
+:INSTALL_ADOBE_READER
+echo [%time%] Installazione Adobe Reader IT... >> "%logfile%"
+echo Installazione Adobe Reader IT...
 winget install -h --id Adobe.Acrobat.Reader.64-bit --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ Adobe Reader installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Adobe Reader >> "%logfile%")
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ Adobe Reader installato >> "%logfile%"
+    echo ✓ Adobe Reader installato
+) else (
+    echo [%time%] ✗ Errore installazione Adobe Reader >> "%logfile%"
+    echo ✗ Errore installazione Adobe Reader
+)
+exit /b
 
-REM Google Chrome IT
-echo [%time%] Installando Google Chrome IT... >> "%logfile%"
-echo Installando Google Chrome IT...
+:INSTALL_GOOGLE_CHROME
+echo [%time%] Installazione Google Chrome IT... >> "%logfile%"
+echo Installazione Google Chrome IT...
 winget install -h --id Google.Chrome --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ Google Chrome installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Google Chrome >> "%logfile%")
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ Google Chrome installato >> "%logfile%"
+    echo ✓ Google Chrome installato
+) else (
+    echo [%time%] ✗ Errore installazione Google Chrome >> "%logfile%"
+    echo ✗ Errore installazione Google Chrome
+)
+exit /b
 
-REM Speccy
-echo [%time%] Installando Speccy... >> "%logfile%"
-echo Installando Speccy...
+:INSTALL_SPECCY
+echo [%time%] Installazione Speccy... >> "%logfile%"
+echo Installazione Speccy...
 winget install -h --id Piriform.Speccy --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (
+if !errorlevel! equ 0 (
     echo [%time%] ✓ Speccy installato >> "%logfile%"
-    echo [%time%] Generazione report Speccy... >> "%logfile%"
-    echo Generazione report Speccy...
-    set "COMPUTERNAME=%COMPUTERNAME%"
-    
-    REM Usa lo stesso formato per il report Speccy
-    for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
-        set "report_year=%%c"
-        set "report_month=%%a"
-        set "report_day=%%b"
-    )
-    for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
-        set "report_hour=%%a"
-        set "report_minute=%%b"
-    )
-    
-    REM Rimuove tutti gli spazi
-    set "report_year=!report_year: =!"
-    set "report_month=!report_month: =!"
-    set "report_day=!report_day: =!"
-    set "report_hour=!report_hour: =!"
-    set "report_minute=!report_minute: =!"
-    
-    REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
-    if "!report_month!" lss "10" set "report_month=0!report_month!"
-    if "!report_day!" lss "10" set "report_day=0!report_day!"
-    if "!report_hour!" lss "10" set "report_hour=0!report_hour!"
-    if "!report_minute!" lss "10" set "report_minute=0!report_minute!"
-    
-    set "reportfile=Speccy_Report_%COMPUTERNAME%_!report_year!-!report_month!-!report_day!_!report_hour!-!report_minute!.txt"
-    "C:\Program Files\Speccy\Speccy.exe" /silent /report_txt:"%USERPROFILE%\Desktop\%reportfile%"
-    if exist "%USERPROFILE%\Desktop\%reportfile%" (
-        echo [%time%] ✓ Report Speccy creato >> "%logfile%"
-    ) else (
-        echo [%time%] ✗ Report Speccy non creato >> "%logfile%"
-    )
+    echo ✓ Speccy installato
 ) else (
     echo [%time%] ✗ Errore installazione Speccy >> "%logfile%"
+    echo ✗ Errore installazione Speccy
 )
+exit /b
 
-REM LibreOffice IT
-echo [%time%] Installando LibreOffice IT... >> "%logfile%"
-echo Installando LibreOffice IT...
+:INSTALL_LIBREOFFICE
+echo [%time%] Installazione LibreOffice IT... >> "%logfile%"
+echo Installazione LibreOffice IT...
 winget install -h --id TheDocumentFoundation.LibreOffice --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ LibreOffice installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione LibreOffice >> "%logfile%")
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ LibreOffice installato >> "%logfile%"
+    echo ✓ LibreOffice installato
+) else (
+    echo [%time%] ✗ Errore installazione LibreOffice >> "%logfile%"
+    echo ✗ Errore installazione LibreOffice
+)
+exit /b
 
-REM Supremo Remote Desktop
+:DOWNLOAD_SUPREMO
 echo [%time%] Download Supremo... >> "%logfile%"
 echo Download Supremo...
-powershell -Command "Invoke-WebRequest -Uri 'https://www.nanosystems.it/public/download/Supremo.exe' -OutFile '%USERPROFILE%\Desktop\Supremo.exe'"
-if exist "%USERPROFILE%\Desktop\Supremo.exe" (
+powershell -Command "Invoke-WebRequest -Uri '%SUPREMO_URL%' -OutFile 'C:\Users\Public\Desktop\Supremo.exe'"
+if exist "C:\Users\Public\Desktop\Supremo.exe" (
     echo [%time%] ✓ Supremo scaricato >> "%logfile%"
-) else (
+    echo ✓ Supremo scaricato sul desktop pubblico
+) else (  
     echo [%time%] ✗ Download Supremo fallito >> "%logfile%"
+    echo ✗ Download Supremo fallito
 )
+exit /b
 
-goto CREATE_WINUTIL
-
-:INSTALL_OPTIONAL
-echo [%time%] INSTALLAZIONE SOFTWARE OPZIONALI... >> "%logfile%"
-echo.
-echo INSTALLAZIONE SOFTWARE OPZIONALI...
-
-if !INSTALL_POWERSHELL!==1 (
-    echo [%time%] Installando PowerShell... >> "%logfile%"
-    echo Installando PowerShell...
-    winget install -h --id Microsoft.PowerShell -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ PowerShell installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione PowerShell >> "%logfile%")
+:INSTALL_POWERSHELL
+echo [%time%] Installazione PowerShell... >> "%logfile%"
+echo Installazione PowerShell...
+winget install -h --id Microsoft.PowerShell -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ PowerShell installato >> "%logfile%"
+    echo ✓ PowerShell installato
+) else (
+    echo [%time%] ✗ Errore installazione PowerShell >> "%logfile%"
+    echo ✗ Errore installazione PowerShell
 )
+exit /b
 
-if !INSTALL_VEEAM!==1 (
-    echo [%time%] Installando Veeam Agent... >> "%logfile%"
-    echo Installando Veeam Agent...
-    winget install -h --id Veeam.VeeamAgent -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Veeam Agent installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Veeam Agent >> "%logfile%")
+:INSTALL_VEEAM
+echo [%time%] Installazione Veeam Agent... >> "%logfile%"
+echo Installazione Veeam Agent...
+winget install -h --id Veeam.VeeamAgent -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ Veeam Agent installato >> "%logfile%"
+    echo ✓ Veeam Agent installato
+) else (
+    echo [%time%] ✗ Errore installazione Veeam Agent >> "%logfile%"
+    echo ✗ Errore installazione Veeam Agent
 )
+exit /b
 
-if !INSTALL_FIREFOX!==1 (
-    echo [%time%] Installando Firefox IT... >> "%logfile%"
-    echo Installando Firefox IT...
-    winget install -h --id Mozilla.Firefox.it -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Firefox installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Firefox >> "%logfile%")
+:INSTALL_FIREFOX
+echo [%time%] Installazione Firefox IT... >> "%logfile%"
+echo Installazione Firefox IT...
+winget install -h --id Mozilla.Firefox.it -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ Firefox installato >> "%logfile%"
+    echo ✓ Firefox installato
+) else (
+    echo [%time%] ✗ Errore installazione Firefox >> "%logfile%"
+    echo ✗ Errore installazione Firefox
 )
+exit /b
 
-if !INSTALL_THUNDERBIRD!==1 (
-    echo [%time%] Installando Thunderbird IT... >> "%logfile%"
-    echo Installando Thunderbird IT...
-    winget install -h --id Mozilla.Thunderbird.it -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Thunderbird installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Thunderbird >> "%logfile%")
+:INSTALL_THUNDERBIRD
+echo [%time%] Installazione Thunderbird IT... >> "%logfile%"
+echo Installazione Thunderbird IT...
+winget install -h --id Mozilla.Thunderbird.it -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ Thunderbird installato >> "%logfile%"
+    echo ✓ Thunderbird installato
+) else (
+    echo [%time%] ✗ Errore installazione Thunderbird >> "%logfile%"
+    echo ✗ Errore installazione Thunderbird
 )
+exit /b
 
-if !INSTALL_NOTEPAD!==1 (
-    echo [%time%] Installando Notepad++ IT... >> "%logfile%"
-    echo Installando Notepad++ IT...
-    winget install -h --id Notepad++.Notepad++ -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Notepad++ installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Notepad++ >> "%logfile%")
+:INSTALL_NOTEPAD
+echo [%time%] Installazione Notepad++ IT... >> "%logfile%"
+echo Installazione Notepad++ IT...
+winget install -h --id Notepad++.Notepad++ -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ Notepad++ installato >> "%logfile%"
+    echo ✓ Notepad++ installato
+) else (
+    echo [%time%] ✗ Errore installazione Notepad++ >> "%logfile%"
+    echo ✗ Errore installazione Notepad++
 )
+exit /b
 
-if !INSTALL_TEAMVIEWER!==1 (
-    echo [%time%] Installando TeamViewer IT... >> "%logfile%"
-    echo Installando TeamViewer IT...
-    winget install -h --id TeamViewer.TeamViewer -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ TeamViewer installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione TeamViewer >> "%logfile%")
+:INSTALL_FREEFILESYNC
+echo [%time%] Download e Installazione FreeFileSync... >> "%logfile%"
+echo Download e Installazione FreeFileSync...
+powershell -Command "Invoke-WebRequest -Uri '%FREEFILESYNC_URL%' -OutFile '%TEMP%\FreeFileSync_Windows_Setup.exe'"
+if exist "%TEMP%\FreeFileSync_Windows_Setup.exe" (
+    echo [%time%] ✓ FreeFileSync scaricato >> "%logfile%"
+    echo ✓ FreeFileSync scaricato
+    start /wait "" "%TEMP%\FreeFileSync_Windows_Setup.exe" 
+    if !errorlevel! equ 0 (
+        echo [%time%] ✓ FreeFileSync installato >> "%logfile%"
+        echo ✓ FreeFileSync installato
+    ) else (
+        echo [%time%] ✗ Errore installazione FreeFileSync >> "%logfile%"
+        echo ✗ Errore installazione FreeFileSync
+    )
+) else (  
+    echo [%time%] ✗ Download FreeFileSync fallito >> "%logfile%"
+    echo ✗ Download FreeFileSync fallito
 )
+exit /b
 
-if !INSTALL_VSCODE!==1 (
-    echo [%time%] Installando Visual Studio Code... >> "%logfile%"
-    echo Installando Visual Studio Code...
-    winget install -h --id Microsoft.VisualStudioCode -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ VS Code installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione VS Code >> "%logfile%")
+:INSTALL_TEAMVIEWER
+echo [%time%] Installazione TeamViewer IT... >> "%logfile%"
+echo Installazione TeamViewer IT...
+winget install -h --id TeamViewer.TeamViewer -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ TeamViewer installato >> "%logfile%"
+    echo ✓ TeamViewer installato
+) else (
+    echo [%time%] ✗ Errore installazione TeamViewer >> "%logfile%"
+    echo ✗ Errore installazione TeamViewer
 )
+exit /b
 
-:CREATE_WINUTIL
-@rem TEMPORARILY DISABLED AS IT DOESN'T WORK
-@rem echo [%time%] Creazione collegamento WinUtil... >> "%logfile%"
-@rem echo Creazione collegamento WinUtil...
-@rem powershell -WindowStyle Hidden -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\WinUtil.lnk'); $Shortcut.TargetPath = 'powershell.exe'; $Shortcut.Arguments = '-NoExit -Command \"irm https://christitus.com/win | iex\"'; $Shortcut.WorkingDirectory = '%USERPROFILE%'; $Shortcut.Save()"
-@rem if %errorlevel% equ 0 (
-@rem     echo [%time%] ✓ Collegamento WinUtil creato >> "%logfile%"
-@rem ) else (
-@rem     echo [%time%] ✗ Errore creazione collegamento WinUtil >> "%logfile%"
-@rem )
+:INSTALL_VSCODE
+echo [%time%] Installazione Visual Studio Code... >> "%logfile%"
+echo Installazione Visual Studio Code...
+winget install -h --id Microsoft.VisualStudioCode -e --accept-package-agreements --accept-source-agreements
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ VS Code installato >> "%logfile%"
+    echo ✓ VS Code installato
+) else (
+    echo [%time%] ✗ Errore installazione VS Code >> "%logfile%"
+    echo ✗ Errore installazione VS Code
+)
+exit /b
+
+:RUN_WINUTIL
+echo [%time%] Esecuzione WinUtil... >> "%logfile%"
+echo Avvio WinUtil...
+powershell -Command "irm https://christitus.com/win | iex"
+if !errorlevel! equ 0 (
+    echo [%time%] ✓ WinUtil eseguito >> "%logfile%"
+    echo ✓ WinUtil eseguito
+) else (
+    echo [%time%] ✗ Errore esecuzione WinUtil >> "%logfile%"
+    echo ✗ Errore esecuzione WinUtil
+)
+exit /b
 
 :COMPLETED
 echo. >> "%logfile%"
 echo ====================================================================== >> "%logfile%"
-echo [%time%] INSTALLAZIONE COMPLETATA >> "%logfile%"
+echo [%time%] ✓ INSTALLAZIONE COMPLETATA >> "%logfile%"
 echo ====================================================================== >> "%logfile%"
 
 echo.
 echo ======================================================================
 echo %SCRIPT_NAME% v%SCRIPT_VERSION% - INSTALLAZIONE COMPLETATA
 echo ======================================================================
-echo.
-if !INSTALL_ONLY_BASE!==1 (
-    echo ✓ Software base installati
-    @rem ATTUALMENTE IL REPORT NON VIENE EFFETTIVAMENTE PRODOTTO...
-    @rem echo ✓ Report Speccy generato sul Desktop
-    echo ✓ Supremo scaricato sul Desktop
-    @rem echo ✓ Collegamento WinUtil creato nel Menu Start
-) else (
-    echo ✓ Software opzionali installati
-)
 echo.
 echo 📄 Log completo: %logfile%
 echo.
