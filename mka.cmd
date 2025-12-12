@@ -202,7 +202,7 @@ echo   -s, --speccy       Installa Speccy
 echo   -l, --libreoffice  Installa LibreOffice 
 echo   -d, --supremo      Scarica Supremo Remote Desktop
 echo.
-echo   -k, --kit          Installa kit base + aggiornamento
+echo   -k, --kit          Installa kit base + aggiornamento pacchetti
 echo.
 echo   -p, --powershell   Installa PowerShell
 echo   -b, --backup       Installa Veeam Agent
@@ -213,9 +213,7 @@ echo   -e, --freefilesync Installa FreeFileSync
 echo   -t, --teamviewer   Installa TeamViewer
 echo   -v, --vscode       Installa Visual Studio Code
 echo   -w, --winutil      Esegue Chris Titus Tech WinUtil
-echo   -u, --update       Aggiorna pacchetti prima di installare
-echo.
-echo NOTA: Il kit base (-k) include automaticamente l'aggiornamento (-u)
+echo   -u, --update       Aggiorna pacchetti 
 echo.
 goto EOF
 
