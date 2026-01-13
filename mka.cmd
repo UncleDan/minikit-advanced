@@ -87,7 +87,7 @@ for %%a in (%*) do (
     ) else if /i "%%~a"=="--speccy" (
         call :WINGET_INSTALL "Speccy" "Piriform.Speccy"
     ) else if /i "%%~a"=="-u" (
-        call :DOWNLOAD_ON_PUBLIC_DESKTOP "Supremo" "https://www.nanosystems.it/public/download/Supremo.exe"
+        call :DOWNLOAD_ON_DESKTOP "Supremo" "https://www.nanosystems.it/public/download/Supremo.exe"
     ) else if /i "%%~a"=="--speccy" (
         call :WINGET_INSTALL "Speccy" "Piriform.Speccy"
     ) else if /i "%%~a"=="-b" (
@@ -130,9 +130,6 @@ for %%a in (%*) do (
 goto EOF
 
 :: *** salto tutto il codice da qui perché non serve più ***
-
-goto CHECK_WINGET
-
 
 :CHECK_WINGET
 echo [%time%] Verifica Winget... >> "%logfile%"
