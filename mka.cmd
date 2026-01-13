@@ -55,7 +55,10 @@ for %%a in (%*) do (
 
     if /i "%%~a"=="-w" call :RUN_WINUTIL & goto :EOF
     if /i "%%~a"=="--winutil" call :RUN_WINUTIL & goto :EOF
-    
+
+    if /i "%%~a"=="-k" call :INSTALL_KIT & goto :EOF
+    if /i "%%~a"=="--kit" call :INSTALL_KIT & goto :EOF
+
 )
 
 call :INIT_LOGFILE
@@ -63,8 +66,64 @@ call :INIT_LOGFILE
 :: Full parameters check (if not exclusive)
 for %%a in (%*) do (
 
-    if /i "%%~a"=="-7" call :WINGET_INSTALL "7-Zip" "7zip.7zip"
-    if /i "%%~a"=="--7zip" call :WINGET_INSTALL "7-Zip" "7zip.7zip"
+    if /i "%%~a"=="-7" (
+        call :WINGET_INSTALL "7-Zip" "7zip.7zip"
+    ) else if /i "%%~a"=="--7zip" (
+        call :WINGET_INSTALL "7-Zip" "7zip.7zip"
+    ) else if /i "%%~a"=="-a" (
+        call :WINGET_INSTALL "Adobe Reader" "Adobe.Acrobat.Reader.64-bit"
+    ) else if /i "%%~a"=="--adobereader" (
+        call :WINGET_INSTALL "Adobe Reader" "Adobe.Acrobat.Reader.64-bit"
+    ) else if /i "%%~a"=="-c" (
+        call :WINGET_INSTALL "Google Chrome" "Google.Chrome"
+    ) else if /i "%%~a"=="--chrome" (
+        call :WINGET_INSTALL "Google Chrome" "Google.Chrome"
+    ) else if /i "%%~a"=="-l" (
+        call :WINGET_INSTALL "Libre Office" "TheDocumentFoundation.LibreOffice"
+    ) else if /i "%%~a"=="--libreoffice" (
+        call :WINGET_INSTALL "Libre Office" "TheDocumentFoundation.LibreOffice"
+    ) else if /i "%%~a"=="-s" (
+        call :WINGET_INSTALL "Speccy" "Piriform.Speccy"
+    ) else if /i "%%~a"=="--speccy" (
+        call :WINGET_INSTALL "Speccy" "Piriform.Speccy"
+    ) else if /i "%%~a"=="-u" (
+        call :DOWNLOAD_ON_PUBLIC_DESKTOP "Supremo" "https://www.nanosystems.it/public/download/Supremo.exe"
+    ) else if /i "%%~a"=="--speccy" (
+        call :WINGET_INSTALL "Speccy" "Piriform.Speccy"
+    ) else if /i "%%~a"=="-b" (
+        call :WINGET_INSTALL "Veeam Agent for Microsoft Windows" "Veeam.VeeamAgent"
+    ) else if /i "%%~a"=="--backup" (
+        call :WINGET_INSTALL "Veeam Agent for Microsoft Windows" "Veeam.VeeamAgent"
+    ) else if /i "%%~a"=="-f" (
+        call :WINGET_INSTALL "Firefox IT" "Mozilla.Firefox.it"
+    ) else if /i "%%~a"=="--firefox" (
+        call :WINGET_INSTALL "Firefox IT" "Mozilla.Firefox.it"
+    ) else if /i "%%~a"=="-n" (
+        call :WINGET_INSTALL "Notepad++" "Notepad++.Notepad++"
+    ) else if /i "%%~a"=="--notepad" (
+        call :WINGET_INSTALL "Notepad++" "Notepad++.Notepad++"
+    ) else if /i "%%~a"=="-p" (
+        call :WINGET_INSTALL "PowerShell" "Microsoft.PowerShell"
+    ) else if /i "%%~a"=="--powershell" (
+        call :WINGET_INSTALL "PowerShell" "Microsoft.PowerShell"
+    ) else if /i "%%~a"=="-r" (
+        call :WINGET_INSTALL "Thunderbird IT" "Mozilla.Thunderbird.it"
+    ) else if /i "%%~a"=="--thunderbird" (
+        call :WINGET_INSTALL "Thunderbird IT" "Mozilla.Thunderbird.it"
+    ) else if /i "%%~a"=="-t" (
+        call :WINGET_INSTALL "TeamViewer" "TeamViewer.TeamViewer"
+    ) else if /i "%%~a"=="--teamviewer" (
+        call :WINGET_INSTALL "TeamViewer" "TeamViewer.TeamViewer"
+    ) else if /i "%%~a"=="-c" (
+        call :WINGET_INSTALL "Visual Studio Code" "Microsoft.VisualStudioCode"
+    ) else if /i "%%~a"=="--vscode" (
+        call :WINGET_INSTALL "Visual Studio Code" "Microsoft.VisualStudioCode"
+    ) else (
+        echo [%time%] Parametro non riconosciuto: %%~a >> "%logfile%"
+        echo.
+        echo ✗ AVVISO: Parametro non riconosciuto %%~a
+        echo.
+    )
     
 )
 
@@ -101,163 +160,6 @@ if %errorlevel% equ 0 (
     echo [%time%] ✗ Errore aggiornamento >> "%logfile%"
 )
 
-REM Installa in base ai parametri
-if !INSTALL_ONLY_BASE!==1 (
-    goto INSTALL_BASE
-) else (
-    goto INSTALL_OPTIONAL
-)
-
-:INSTALL_BASE
-echo [%time%] INSTALLAZIONE SOFTWARE BASE... >> "%logfile%"
-echo.
-echo INSTALLAZIONE SOFTWARE BASE...
-
-REM 7-Zip
-echo [%time%] Installando 7-Zip... >> "%logfile%"
-echo Installando 7-Zip...
-winget install -h --id 7zip.7zip --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ 7-Zip installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione 7-Zip >> "%logfile%")
-
-REM Adobe Reader IT
-echo [%time%] Installando Adobe Reader IT... >> "%logfile%"
-echo Installando Adobe Reader IT...
-winget install -h --id Adobe.Acrobat.Reader.64-bit --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ Adobe Reader installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Adobe Reader >> "%logfile%")
-
-REM Google Chrome IT
-echo [%time%] Installando Google Chrome IT... >> "%logfile%"
-echo Installando Google Chrome IT...
-winget install -h --id Google.Chrome --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ Google Chrome installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Google Chrome >> "%logfile%")
-
-REM Speccy
-echo [%time%] Installando Speccy... >> "%logfile%"
-echo Installando Speccy...
-winget install -h --id Piriform.Speccy --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (
-    echo [%time%] ✓ Speccy installato >> "%logfile%"
-    echo [%time%] Generazione report Speccy... >> "%logfile%"
-    echo Generazione report Speccy...
-    set "COMPUTERNAME=%COMPUTERNAME%"
-    
-    REM Usa lo stesso formato per il report Speccy
-    for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
-        set "report_year=%%c"
-        set "report_month=%%a"
-        set "report_day=%%b"
-    )
-    for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
-        set "report_hour=%%a"
-        set "report_minute=%%b"
-    )
-    
-    REM Rimuove tutti gli spazi
-    set "report_year=!report_year: =!"
-    set "report_month=!report_month: =!"
-    set "report_day=!report_day: =!"
-    set "report_hour=!report_hour: =!"
-    set "report_minute=!report_minute: =!"
-    
-    REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
-    if "!report_month!" lss "10" set "report_month=0!report_month!"
-    if "!report_day!" lss "10" set "report_day=0!report_day!"
-    if "!report_hour!" lss "10" set "report_hour=0!report_hour!"
-    if "!report_minute!" lss "10" set "report_minute=0!report_minute!"
-    
-    set "reportfile=Speccy_Report_%COMPUTERNAME%_!report_year!-!report_month!-!report_day!_!report_hour!-!report_minute!.txt"
-    "C:\Program Files\Speccy\Speccy.exe" /silent /report_txt:"%USERPROFILE%\Desktop\%reportfile%"
-    if exist "%USERPROFILE%\Desktop\%reportfile%" (
-        echo [%time%] ✓ Report Speccy creato >> "%logfile%"
-    ) else (
-        echo [%time%] ✗ Report Speccy non creato >> "%logfile%"
-    )
-) else (
-    echo [%time%] ✗ Errore installazione Speccy >> "%logfile%"
-)
-
-REM LibreOffice IT
-echo [%time%] Installando LibreOffice IT... >> "%logfile%"
-echo Installando LibreOffice IT...
-winget install -h --id TheDocumentFoundation.LibreOffice --accept-package-agreements --accept-source-agreements
-if %errorlevel% equ 0 (echo [%time%] ✓ LibreOffice installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione LibreOffice >> "%logfile%")
-
-REM Supremo Remote Desktop
-echo [%time%] Download Supremo... >> "%logfile%"
-echo Download Supremo...
-powershell -Command "Invoke-WebRequest -Uri 'https://www.nanosystems.it/public/download/Supremo.exe' -OutFile '%USERPROFILE%\Desktop\Supremo.exe'"
-if exist "%USERPROFILE%\Desktop\Supremo.exe" (
-    echo [%time%] ✓ Supremo scaricato >> "%logfile%"
-) else (
-    echo [%time%] ✗ Download Supremo fallito >> "%logfile%"
-)
-
-goto CREATE_WINUTIL
-
-:INSTALL_OPTIONAL
-echo [%time%] INSTALLAZIONE SOFTWARE OPZIONALI... >> "%logfile%"
-echo.
-echo INSTALLAZIONE SOFTWARE OPZIONALI...
-
-if !INSTALL_POWERSHELL!==1 (
-    echo [%time%] Installando PowerShell... >> "%logfile%"
-    echo Installando PowerShell...
-    winget install -h --id Microsoft.PowerShell -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ PowerShell installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione PowerShell >> "%logfile%")
-)
-
-if !INSTALL_VEEAM!==1 (
-    echo [%time%] Installando Veeam Agent... >> "%logfile%"
-    echo Installando Veeam Agent...
-    winget install -h --id Veeam.VeeamAgent -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Veeam Agent installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Veeam Agent >> "%logfile%")
-)
-
-if !INSTALL_FIREFOX!==1 (
-    echo [%time%] Installando Firefox IT... >> "%logfile%"
-    echo Installando Firefox IT...
-    winget install -h --id Mozilla.Firefox.it -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Firefox installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Firefox >> "%logfile%")
-)
-
-if !INSTALL_THUNDERBIRD!==1 (
-    echo [%time%] Installando Thunderbird IT... >> "%logfile%"
-    echo Installando Thunderbird IT...
-    winget install -h --id Mozilla.Thunderbird.it -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Thunderbird installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Thunderbird >> "%logfile%")
-)
-
-if !INSTALL_NOTEPAD!==1 (
-    echo [%time%] Installando Notepad++ IT... >> "%logfile%"
-    echo Installando Notepad++ IT...
-    winget install -h --id Notepad++.Notepad++ -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ Notepad++ installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione Notepad++ >> "%logfile%")
-)
-
-if !INSTALL_TEAMVIEWER!==1 (
-    echo [%time%] Installando TeamViewer IT... >> "%logfile%"
-    echo Installando TeamViewer IT...
-    winget install -h --id TeamViewer.TeamViewer -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ TeamViewer installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione TeamViewer >> "%logfile%")
-)
-
-if !INSTALL_VSCODE!==1 (
-    echo [%time%] Installando Visual Studio Code... >> "%logfile%"
-    echo Installando Visual Studio Code...
-    winget install -h --id Microsoft.VisualStudioCode -e --accept-package-agreements --accept-source-agreements
-    if %errorlevel% equ 0 (echo [%time%] ✓ VS Code installato >> "%logfile%") else (echo [%time%] ✗ Errore installazione VS Code >> "%logfile%")
-)
-
-:CREATE_WINUTIL
-@rem TEMPORARILY DISABLED AS IT DOESN'T WORK
-@rem echo [%time%] Creazione collegamento WinUtil... >> "%logfile%"
-@rem echo Creazione collegamento WinUtil...
-@rem powershell -WindowStyle Hidden -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\WinUtil.lnk'); $Shortcut.TargetPath = 'powershell.exe'; $Shortcut.Arguments = '-NoExit -Command \"irm https://christitus.com/win | iex\"'; $Shortcut.WorkingDirectory = '%USERPROFILE%'; $Shortcut.Save()"
-@rem if %errorlevel% equ 0 (
-@rem     echo [%time%] ✓ Collegamento WinUtil creato >> "%logfile%"
-@rem ) else (
-@rem     echo [%time%] ✗ Errore creazione collegamento WinUtil >> "%logfile%"
-@rem )
 
 :COMPLETED
 echo. >> "%logfile%"
@@ -301,20 +203,29 @@ echo USO:
 echo   %SCRIPT_FULLNAME% [OPZIONI]
 echo.
 echo OPZIONI:
-echo   -p, --powershell    Installa PowerShell
-echo   -b, --backup        Installa Veeam Agent per backup
-echo   -f, --firefox       Installa Mozilla Firefox ^(italiano^)
-echo   -r, --thunderbird   Installa Mozilla Thunderbird ^(italiano^)
-echo   -n, --notepad       Installa Notepad++ ^(italiano^)
-echo   -t, --teamviewer    Installa TeamViewer ^(italiano^)
-echo   -v, --vscode        Installa Visual Studio Code
-echo   -w, --winutil       Esegue Chris Titus Tech WinUtil
-echo   -h, --help          Mostra questo aiuto
+echo   -k, --kit    Installa kit base
 echo.
-echo.
-echo Il KIT comprende ^(solo senza parametri^):
+echo Il kit base comprende l'installazione automatica del seguente software:
 echo   7-Zip, Adobe Reader IT, Google Chrome IT, Speccy,
 echo   LibreOffice IT, Supremo Remote Desktop
+echo.
+echo   -7, --7zip          Installa 7-Zip
+echo   -a, --adobereader   Installa Adobe Acrobat Reader IT
+echo   -c, --chrome        Installa Google Chrome IT
+echo   -l, --libreoffice   Installa LibreOffice IT
+echo   -s, --speccy        Installa Speccy
+echo   -u, --supremo       Scarica Supremo Remote Desktop sul Desktop
+echo.
+echo   -b, --backup        Installa Veeam Agent per backup
+echo   -f, --firefox       Installa Mozilla Firefox ^(italiano^)
+echo   -n, --notepad       Installa Notepad++ ^(italiano^)
+echo   -p, --powershell    Installa PowerShell
+echo   -r, --thunderbird   Installa Mozilla Thunderbird ^(italiano^)
+echo   -t, --teamviewer    Installa TeamViewer ^(italiano^)
+echo   -v, --vscode        Installa Visual Studio Code
+echo.
+echo   -w, --winutil       Esegue Chris Titus Tech WinUtil
+echo   -h, --help          Mostra questo aiuto
 echo.
 echo ESEMPI:
 echo   %SCRIPT_FULLNAME%                    - Visualizza questo aiuto
@@ -405,7 +316,6 @@ setlocal
 set "software_name=%~1"
 set "id_file=%~2"
 
-:: CONTROLLO 1: Verifica parametri obbligatori
 if "%~2"=="" (
     :: [ERRORE] Parametri insufficienti!
     :: Utilizzo: call :WINGET_INSTALL "NomeSoftware" "ID/File"
@@ -427,6 +337,62 @@ if %errorlevel% equ 0 (
 echo.
 endlocal & exit /b 1
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Winget install function - END
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::: Download on Desktop function - BEGIN
+:DOWNLOAD_ON_DESKTOP
+setlocal
+set "software_name=%~1"
+set "download_url=%~2"
+
+if "%~2"=="" (
+    :: [ERRORE] Parametri insufficienti!
+    :: Utilizzo: call :DOWNLOAD_ON_DESKTOP "NomeSoftware" "URL"
+    ::
+    :: Esempio:
+    ::   call :DOWNLOAD_ON_DESKTOP "Supremo" "https://www.nanosystems.it/public/download/Supremo.exe"
+    goto :ERROR_EXIT
+)
+
+echo [%time%] Download %software_name% >> "%logfile%"
+echo Download %software_name% in corso...
+powershell -Command "Invoke-WebRequest -Uri '%download_url%' -OutFile '%USERPROFILE%\Desktop\%software_name%.exe'"
+if %errorlevel% equ 0 (
+    echo [%time%] ✓ %software_name% scaricato >> "%logfile%"
+) else (
+    echo [%time%] ✗ Errore download %software_name% >> "%logfile%"
+)
+
+echo.
+endlocal & exit /b 1
+:::::::::::::::::::::::::::::::::::::::::::::::::::::: Download on Desktop function - END
+
+::::::::::::::::::::::::::::::::::::::::::::: Download on public Desktop function - BEGIN
+:DOWNLOAD_ON_PUBLIC_DESKTOP
+setlocal
+set "software_name=%~1"
+set "download_url=%~2"
+
+if "%~2"=="" (
+    :: [ERRORE] Parametri insufficienti!
+    :: Utilizzo: call :DOWNLOAD_ON_PUBLIC_DESKTOP "NomeSoftware" "URL"
+    ::
+    :: Esempio:
+    ::   call :DOWNLOAD_ON_PUBLIC_DESKTOP "Supremo" "https://www.nanosystems.it/public/download/Supremo.exe"
+    goto :ERROR_EXIT
+)
+
+echo [%time%] Download %software_name% >> "%logfile%"
+echo Download %software_name% in corso...
+powershell -Command "Invoke-WebRequest -Uri '%download_url%' -OutFile 'C:\Users\Public\Desktop\%software_name%.exe'"
+if %errorlevel% equ 0 (
+    echo [%time%] ✓ %software_name% scaricato >> "%logfile%"
+) else (
+    echo [%time%] ✗ Errore download %software_name% >> "%logfile%"
+)
+
+echo.
+endlocal & exit /b 1
+:::::::::::::::::::::::::::::::::::::::::::::::: Download on publicDesktop function - END
 
 :EOF
 ::                 _              __         __ _ _      
