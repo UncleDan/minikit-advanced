@@ -1,193 +1,79 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Mini-Kit Advanced v25.11 by Daniele Lolli (UncleDan)
-REM Script di installazione software per Windows - Modalità Batch
+::                         kkkkkkkk                           
+::                         k::::::k                           
+::                         k::::::k                           
+::                         k::::::k                           
+::    mmmmmmm    mmmmmmm    k:::::k    kkkkkkkaaaaaaaaaaaaa   
+::  mm:::::::m  m:::::::mm  k:::::k   k:::::k a::::::::::::a  
+:: m::::::::::mm::::::::::m k:::::k  k:::::k  aaaaaaaaa:::::a 
+:: m::::::::::::::::::::::m k:::::k k:::::k            a::::a 
+:: m:::::mmm::::::mmm:::::m k::::::k:::::k      aaaaaaa:::::a 
+:: m::::m   m::::m   m::::m k:::::::::::k     aa::::::::::::a 
+:: m::::m   m::::m   m::::m k:::::::::::k    a::::aaaa::::::a               _       _        _    _ _               _                               _ 
+:: m::::m   m::::m   m::::m k::::::k:::::k  a::::a    a:::::a              (_)     (_)      | |  (_) |             | |                             | |
+:: m::::m   m::::m   m::::mk::::::k k:::::k a::::a    a:::::a     _ __ ___  _ _ __  _ ______| | ___| |_    __ _  __| |_   ____ _ _ __   ___ ___  __| |
+:: m::::m   m::::m   m::::mk::::::k  k:::::ka:::::aaaa::::::a    | '_ ` _ \| | '_ \| |______| |/ / | __|  / _` |/ _` \ \ / / _` | '_ \ / __/ _ \/ _` |
+:: m::::m   m::::m   m::::mk::::::k   k:::::ka::::::::::aa:::a   | | | | | | | | | | |      |   <| | |_  | (_| | (_| |\ V / (_| | | | | (_|  __/ (_| |
+:: mmmmmm   mmmmmm   mmmmmmkkkkkkkk    kkkkkkkaaaaaaaaaa  aaaa   |_| |_| |_|_|_| |_|_|      |_|\_\_|\__|  \__,_|\__,_| \_/ \__,_|_| |_|\___\___|\__,_|
+::                                                            
+
+::      _           _                 _   _                 
+::     | |         | |               | | (_)                
+::   __| | ___  ___| | __ _ _ __ __ _| |_ _  ___  _ __  ___ 
+::  / _` |/ _ \/ __| |/ _` | '__/ _` | __| |/ _ \| '_ \/ __|
+:: | (_| |  __/ (__| | (_| | | | (_| | |_| | (_) | | | \__ \
+::  \__,_|\___|\___|_|\__,_|_|  \__,_|\__|_|\___/|_| |_|___/
+::                                                          
+
 
 set "SCRIPT_NAME=Mini-Kit Advanced"
 set "SCRIPT_AUTHOR=Daniele Lolli (UncleDan)"
-set "SCRIPT_VERSION=25.11"
+set "SCRIPT_VERSION=26.01"
 
 REM Ottiene il nome completo del file in esecuzione e il percorso
 set "SCRIPT_FULLNAME=%~nx0"
 set "SCRIPT_NAME_NOEXT=%~n0"
 set "SCRIPT_PATH=%~dp0"
 
-REM Controlla se *NON* ci sono parametri
-if "%~1"=="" goto NO_PARAMS
+::                  _       
+::                 (_)      
+::  _ __ ___   __ _ _ _ __  
+:: | '_ ` _ \ / _` | | '_ \ 
+:: | | | | | | (_| | | | | |
+:: |_| |_| |_|\__,_|_|_| |_|
+::                          
 
-REM Se ci sono, analizza i parametri
-set "INSTALL_ONLY_BASE=0"
-set "INSTALL_POWERSHELL=0"
-set "INSTALL_VEEAM=0"
-set "INSTALL_FIREFOX=0"
-set "INSTALL_THUNDERBIRD=0"
-set "INSTALL_NOTEPAD=0"
-set "INSTALL_TEAMVIEWER=0"
-set "INSTALL_VSCODE=0"
+if "%~1"=="" call :SHOW_HELP & goto :EOF
 
-:PARSE_LOOP
-if "%~1"=="" goto MAIN
-if /i "%~1"=="-p" set "INSTALL_POWERSHELL=1"
-if /i "%~1"=="--powershell" set "INSTALL_POWERSHELL=1"
-if /i "%~1"=="-b" set "INSTALL_VEEAM=1"
-if /i "%~1"=="--backup" set "INSTALL_VEEAM=1"
-if /i "%~1"=="-f" set "INSTALL_FIREFOX=1"
-if /i "%~1"=="--firefox" set "INSTALL_FIREFOX=1"
-if /i "%~1"=="-r" set "INSTALL_THUNDERBIRD=1"
-if /i "%~1"=="--thunderbird" set "INSTALL_THUNDERBIRD=1"
-if /i "%~1"=="-n" set "INSTALL_NOTEPAD=1"
-if /i "%~1"=="--notepad" set "INSTALL_NOTEPAD=1"
-if /i "%~1"=="-t" set "INSTALL_TEAMVIEWER=1"
-if /i "%~1"=="--teamviewer" set "INSTALL_TEAMVIEWER=1"
-if /i "%~1"=="-v" set "INSTALL_VSCODE=1"
-if /i "%~1"=="--vscode" set "INSTALL_VSCODE=1"
-if /i "%~1"=="-w" goto RUN_WINUTIL
-if /i "%~1"=="--winutil" goto RUN_WINUTIL
-if /i "%~1"=="-h" goto SHOW_HELP
-if /i "%~1"=="--help" goto SHOW_HELP
-if /i "%~1"=="/?" goto SHOW_HELP
+:: Exclusive parameters
+for %%a in (%*) do (
 
-shift
-goto PARSE_LOOP
+    if /i "%%~a"=="-h" call :SHOW_HELP & goto :EOF
+    if /i "%%~a"=="--help" call :SHOW_HELP & goto :EOF
 
-:NO_PARAMS
-set "INSTALL_ONLY_BASE=1"
-
-:MAIN
-REM Configurazione percorso e nome file log con formato migliorato
-for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
-    set "year=%%c"
-    set "month=%%a"
-    set "day=%%b"
-)
-for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
-    set "hour=%%a"
-    set "minute=%%b"
+    if /i "%%~a"=="-w" call :RUN_WINUTIL & goto :EOF
+    if /i "%%~a"=="--winutil" call :RUN_WINUTIL & goto :EOF
+    
 )
 
-REM Rimuove tutti gli spazi
-set "year=!year: =!"
-set "month=!month: =!"
-set "day=!day: =!"
-set "hour=!hour: =!"
-set "minute=!minute: =!"
+call :INIT_LOGFILE
 
-REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
-if "!month!" lss "10" set "month=0!month!"
-if "!day!" lss "10" set "day=0!day!"
-if "!hour!" lss "10" set "hour=0!hour!"
-if "!minute!" lss "10" set "minute=0!minute!"
+:: Full parameters check (if not exclusive)
+for %%a in (%*) do (
 
-set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_!year!-!month!-!day!_!hour!-!minute!.log"
-
-cls
-echo ======================================================================
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
-echo ======================================================================
-echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
-echo ======================================================================
-echo Log: %logfile%
-echo.
-
-echo ====================================================================== >> "%logfile%"
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
-echo ====================================================================== >> "%logfile%"
-echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS >> "%logfile%"
-echo ====================================================================== >> "%logfile%"
-echo Log: %logfile% >> "%logfile%"
-echo. >> "%logfile%"
-
-if !INSTALL_ONLY_BASE!==1 (
-    echo NESSUN PARAMETRO: Installazione SOLO software base
-    echo ----------------------------------------------------------------------
-    echo.
-
-    echo [%time%] NESSUN PARAMETRO: Installazione SOLO software base >> "%logfile%"
-    echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
-
-) else (
-    echo PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati
-    echo CONFIGURAZIONE INSTALLAZIONE:
-    echo    Software base: NO
-    echo    Software opzionali: SI
-    echo ----------------------------------------------------------------------
-    echo.
-
-    echo [%time%] PARAMETRI RILEVATI: Installazione SOLO software opzionali specificati >> "%logfile%"
-    echo [%time%] CONFIGURAZIONE INSTALLAZIONE: >> "%logfile%"
-    echo [%time%]   Software base: NO >> "%logfile%"
-
-    set "OPTIONAL_COUNT=0"
-    if !INSTALL_POWERSHELL!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   PowerShell: SI >> "%logfile%"
-    if !INSTALL_VEEAM!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Veeam Agent: SI >> "%logfile%"
-    if !INSTALL_FIREFOX!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Firefox: SI >> "%logfile%"
-    if !INSTALL_THUNDERBIRD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Thunderbird: SI >> "%logfile%"
-    if !INSTALL_NOTEPAD!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   Notepad++: SI >> "%logfile%"
-    if !INSTALL_TEAMVIEWER!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   TeamViewer: SI >> "%logfile%"
-    if !INSTALL_VSCODE!==1 set /a "OPTIONAL_COUNT+=1" && echo [%time%]   VS Code: SI >> "%logfile%"
-
-    echo [%time%]   Software opzionali selezionati: !OPTIONAL_COUNT! >> "%logfile%"
-    echo [%time%] ---------------------------------------------------------------------- >> "%logfile%"
-
+    if /i "%%~a"=="-7" call :WINGET_INSTALL "7-Zip" "7zip.7zip"
+    if /i "%%~a"=="--7zip" call :WINGET_INSTALL "7-Zip" "7zip.7zip"
+    
 )
+
+goto EOF
+
+:: *** salto tutto il codice da qui perché non serve più ***
 
 goto CHECK_WINGET
 
-:SHOW_HELP
-echo.
-echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
-echo.
-echo USO:
-echo   %SCRIPT_FULLNAME% [OPZIONI]
-echo.
-echo OPZIONI:
-echo   -p, --powershell    Installa PowerShell
-echo   -b, --backup        Installa Veeam Agent per backup
-echo   -f, --firefox       Installa Mozilla Firefox ^(italiano^)
-echo   -r, --thunderbird   Installa Mozilla Thunderbird ^(italiano^)
-echo   -n, --notepad       Installa Notepad++ ^(italiano^)
-echo   -t, --teamviewer    Installa TeamViewer ^(italiano^)
-echo   -v, --vscode        Installa Visual Studio Code
-echo   -w, --winutil       Esegue Chris Titus Tech WinUtil
-echo   -h, --help          Mostra questo aiuto
-echo.
-echo LOGICA INSTALLAZIONE:
-echo   • SENZA parametri: Installa SOLO software base
-echo   • CON parametri:   Installa SOLO software opzionali specificati ^(NO base^)
-echo.
-echo SOFTWARE BASE ^(solo senza parametri^):
-echo   7-Zip, Adobe Reader IT, Google Chrome IT, Speccy
-echo   LibreOffice IT, Supremo Remote Desktop
-echo.
-echo SOFTWARE OPZIONALI ^(solo con parametri^):
-echo   PowerShell, Veeam Agent, Firefox IT, Thunderbird IT
-echo   Notepad++ IT, TeamViewer IT, Visual Studio Code
-echo.
-echo ESEMPI:
-echo   %SCRIPT_FULLNAME%                    - Tutto e solo software base
-echo   %SCRIPT_FULLNAME% -p -b -f           - Solo PowerShell + Veeam + Firefox
-echo   %SCRIPT_FULLNAME% -n -t -v           - Solo Notepad++ + TeamViewer + VS Code
-echo   %SCRIPT_FULLNAME% -f -r              - Solo Firefox + Thunderbird
-echo   %SCRIPT_FULLNAME% -w                 - Esegui Chris Titus Tech WinUtil
-echo   %SCRIPT_FULLNAME% -h                 - Visualizza questa guida
-echo.
-goto EOF
-
-:RUN_WINUTIL
-echo Avvio WinUtil...
-powershell -Command "irm https://christitus.com/win | iex"
-if %errorlevel% equ 0 (
-    echo.
-    echo ✓ WinUtil eseguito
-    echo.
-) else (
-    echo.
-    echo ✗ ERRORE: Impossibile eseguire WinUtil
-    echo.
-    pause
-)
-goto EOF
 
 :CHECK_WINGET
 echo [%time%] Verifica Winget... >> "%logfile%"
@@ -397,5 +283,156 @@ echo.
 echo 📄 Log completo: %logfile%
 echo.
 
+::   __                  _   _                 
+::  / _|                | | (_)                
+:: | |_ _   _ _ __   ___| |_ _  ___  _ __  ___ 
+:: |  _| | | | '_ \ / __| __| |/ _ \| '_ \/ __|
+:: | | | |_| | | | | (__| |_| | (_) | | | \__ \
+:: |_|  \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
+::                                             
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Show help function - BEGIN
+:SHOW_HELP
+setlocal
+cls
+echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
+echo.
+echo USO:
+echo   %SCRIPT_FULLNAME% [OPZIONI]
+echo.
+echo OPZIONI:
+echo   -p, --powershell    Installa PowerShell
+echo   -b, --backup        Installa Veeam Agent per backup
+echo   -f, --firefox       Installa Mozilla Firefox ^(italiano^)
+echo   -r, --thunderbird   Installa Mozilla Thunderbird ^(italiano^)
+echo   -n, --notepad       Installa Notepad++ ^(italiano^)
+echo   -t, --teamviewer    Installa TeamViewer ^(italiano^)
+echo   -v, --vscode        Installa Visual Studio Code
+echo   -w, --winutil       Esegue Chris Titus Tech WinUtil
+echo   -h, --help          Mostra questo aiuto
+echo.
+echo.
+echo Il KIT comprende ^(solo senza parametri^):
+echo   7-Zip, Adobe Reader IT, Google Chrome IT, Speccy,
+echo   LibreOffice IT, Supremo Remote Desktop
+echo.
+echo ESEMPI:
+echo   %SCRIPT_FULLNAME%                    - Visualizza questo aiuto
+echo   %SCRIPT_FULLNAME% -h                 - Visualizza questa guida
+echo   %SCRIPT_FULLNAME% -k                 - Installa il kit di software base
+echo   %SCRIPT_FULLNAME% --backup           - Installa Veeam Backup Agent
+echo   %SCRIPT_FULLNAME% -n -t -v           - Installa Notepad++ + TeamViewer + VS Code
+echo   %SCRIPT_FULLNAME% -f -r              - Installa Firefox + Thunderbird
+echo   %SCRIPT_FULLNAME% -w                 - Esegui Chris Titus Tech WinUtil
+echo.
+endlocal & exit /b 1
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Show help function - END
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::: Run Chrs Titus Tech WinUtil - BEGIN
+:RUN_WINUTIL
+setlocal
+echo Avvio WinUtil...
+powershell -Command "irm https://christitus.com/win | iex"
+if %errorlevel% equ 0 (
+    echo.
+    echo ✓ WinUtil eseguito
+    echo.
+) else (
+    echo.
+    echo ✗ ERRORE: Impossibile eseguire WinUtil
+    echo.
+    pause
+)
+endlocal & exit /b 1
+::::::::::::::::::::::::::::::::::::::::::::::::::::::: Run Chrs Titus Tech WinUtil - END
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Init log file funcion - BEGIN
+:: !!! ATTENZIONE !!! controllare senza setlocal funziona o va messo nel main script prima di tutto
+
+:INIT_LOGFILE
+REM Configurazione percorso e nome file log con formato migliorato
+for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
+    set "year=%%c"
+    set "month=%%a"
+    set "day=%%b"
+)
+for /f "tokens=1-2 delims=:" %%a in ('time /t') do (
+    set "hour=%%a"
+    set "minute=%%b"
+)
+
+REM Rimuove tutti gli spazi
+set "year=!year: =!"
+set "month=!month: =!"
+set "day=!day: =!"
+set "hour=!hour: =!"
+set "minute=!minute: =!"
+
+REM Aggiunge zero davanti ai numeri singoli (dopo aver rimosso gli spazi)
+if "!month!" lss "10" set "month=0!month!"
+if "!day!" lss "10" set "day=0!day!"
+if "!hour!" lss "10" set "hour=0!hour!"
+if "!minute!" lss "10" set "minute=0!minute!"
+
+set "logfile=%SCRIPT_PATH%%SCRIPT_NAME_NOEXT%_!year!-!month!-!day!_!hour!-!minute!.log"
+
+@rem cls
+echo ======================================================================
+echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR%
+echo ======================================================================
+echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS
+echo ======================================================================
+echo Log: %logfile%
+echo.
+
+echo ====================================================================== >> "%logfile%"
+echo %SCRIPT_NAME% v%SCRIPT_VERSION% - %SCRIPT_AUTHOR% >> "%logfile%"
+echo ====================================================================== >> "%logfile%"
+echo INSTALLAZIONE AUTOMATICA SOFTWARE WINDOWS >> "%logfile%"
+echo ====================================================================== >> "%logfile%"
+echo Log: %logfile% >> "%logfile%"
+echo. >> "%logfile%"
+
+echo [%time%] Inizio installazione... >> "%logfile%
+echo. >> "%logfile%"
+)
+exit /b 1
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Init log file funcion - END
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Winget install function - BEGIN
+:WINGET_INSTALL
+setlocal
+set "software_name=%~1"
+set "id_file=%~2"
+
+:: CONTROLLO 1: Verifica parametri obbligatori
+if "%~2"=="" (
+    :: [ERRORE] Parametri insufficienti!
+    :: Utilizzo: call :WINGET_INSTALL "NomeSoftware" "ID/File"
+    ::
+    :: Esempio:
+    ::   call :WINGET_INSTALL "7zip" "7zip.7zip"
+    goto :ERROR_EXIT
+)
+
+echo [%time%] Installazione %software_name% >> "%logfile%"
+echo Installazione %software_name% in corso...
+winget install -h --id Microsoft.PowerShell -e --accept-package-agreements --accept-source-agreements
+if %errorlevel% equ 0 (
+    echo [%time%] ✓ %software_name% installato >> "%logfile%"
+) else (
+    echo [%time%] ✗ Errore installazione %software_name% >> "%logfile%"
+)
+
+echo.
+endlocal & exit /b 1
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: Winget install function - END
+
 :EOF
-endlocal
+::                 _              __         __ _ _      
+::                | |            / _|       / _(_) |     
+::   ___ _ __   __| |______ ___ | |_ ______| |_ _| | ___ 
+::  / _ \ '_ \ / _` |______/ _ \|  _|______|  _| | |/ _ \
+:: |  __/ | | | (_| |     | (_) | |        | | | | |  __/
+::  \___|_| |_|\__,_|      \___/|_|        |_| |_|_|\___|
+::                                                       
